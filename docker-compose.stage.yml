@@ -1,0 +1,27 @@
+version: '3'
+services:
+    stage_db:
+        container_name: stage_db
+        image: "postgres:12-alpine"
+        volumes:
+            - "db_vol:/var/lib/postgresql/data"
+        env_file: stage.env
+        networks:
+            - stage_net
+        logging:
+            driver: none
+    stage_back:
+        container_name: stage_back
+        build: ./nucleus
+        env_file: stage.env
+        ports:
+            - "127.0.0.1:8010:5000"
+        networks:
+            - stage_net
+        depends_on:
+            - stage_db
+networks:
+    stage_net:
+        driver: bridge
+volumes:
+    db_vol:
