@@ -21,6 +21,9 @@ logging_configuration = {
         'nucleus': {
             'level': 'DEBUG',
             'handlers': ['console']
-        }
+        },
+        'connexion': {
+            'handlers': ['console']
+        },
     }
 }

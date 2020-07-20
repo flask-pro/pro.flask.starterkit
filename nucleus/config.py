@@ -24,3 +24,7 @@ class Config:
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_RECORD_QUERIES = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Pagination.
+    ITEMS_PER_PAGE = 30
+    MAX_PER_PAGE = 100

@@ -19,10 +19,10 @@ def fx_app():
 
     # Init app for testing.
     app = create_app(TestConfig)
-    app_context = app.app_context()
+    app_context = app.app.app_context()
     app_context.push()
 
-    with app.test_client() as test_client:
+    with app.app.test_client() as test_client:
         yield test_client
 
     # Stop app for testing.
@@ -33,3 +33,16 @@ def fx_app():
                    stdout=subprocess.PIPE).stdout.decode('utf-8')
 
     print('-> Teardown fx_app.')
+
+
+@pytest.fixture()
+def fx_user(fx_app):
+    print('\n-> fx_user')
+    new_user = {'username': 'fixture_user'}
+    r = fx_app.post('/v1/users', json=new_user)
+    assert r.status_code == 201
+
+    yield r.json
+
+    r_delete = fx_app.delete(f'/v1/users/{r.json["id"]}')
+    assert r_delete.status_code == 204

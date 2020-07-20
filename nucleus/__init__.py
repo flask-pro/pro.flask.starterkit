@@ -2,7 +2,7 @@ import time
 from logging.config import dictConfig
 from typing import Type
 
-from flask import Flask
+import connexion
 from sqlalchemy.exc import SQLAlchemyError
 
 from nucleus.common.errors import register_errors
@@ -10,7 +10,6 @@ from nucleus.common.logging import logging_configuration
 from nucleus.config import Config
 from nucleus.models import db
 from nucleus.views.services import registration_service_routes
-from nucleus.views.users import registration_user_routes
 
 
 def create_app(config_app: Type[Config]):
@@ -20,16 +19,19 @@ def create_app(config_app: Type[Config]):
     dictConfig(logging_configuration)
 
     # Init application.
-    app = Flask(__name__)
+    options = {'swagger_url': '/docs'}
+    app_conn = connexion.FlaskApp(__name__, specification_dir='openapi/', options=options)
+    app_conn.add_api('nucleus.yaml', base_path='/v1', validate_responses=True)
+
+    # Flask app.
+    app = app_conn.app
     app.config.from_object(config_app)
 
-    # Подключение расширений Flask.
-    # Flask-SQLAlchemy.
+    # Flask extensions.
     db.init_app(app)
 
     # Registration routes.
     registration_service_routes(app)
-    registration_user_routes(app)
 
     # Registration handlers.
     register_errors(app)
@@ -47,4 +49,4 @@ def create_app(config_app: Type[Config]):
         db.create_all()
         app.logger.info('Database created!')
 
-    return app
+    return app_conn

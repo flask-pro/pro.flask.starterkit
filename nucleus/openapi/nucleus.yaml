@@ -1,0 +1,183 @@
+openapi: 3.0.1
+info:
+  title: pro.flask.starterkit API
+  description: Template for API by pro.flask.starterkit.
+  version: 0.0.1
+servers:
+  - url: 'https://api.flask.pro'
+tags:
+  - name: users
+    description: Manage users.
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      operationId: nucleus.views.users.get_users_list
+      summary: Returns a list of users
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersList"
+    post:
+      tags:
+        - users
+      operationId: nucleus.views.users.create_user
+      summary: Create user
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserNew"
+        required: true
+  /users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - users
+      operationId: nucleus.views.users.get_user
+      summary: Get user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      tags:
+        - users
+      operationId: nucleus.views.users.update_user
+      summary: Update user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+    delete:
+      tags:
+        - users
+      operationId: nucleus.views.users.delete_user
+      summary: Delete user
+      responses:
+        '204':
+          description: OK
+components:
+  parameters:
+    include_metadata:
+      in: query
+      name: include_metadata
+      description: Include metadata object to response
+      schema:
+        type: boolean
+        example: true
+    page:
+      in: query
+      name: page
+      description: Page number
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+    per_page:
+      in: query
+      name: per_page
+      description: Number of records per page
+      schema:
+        type: integer
+        example: 30
+        minimum: 1
+        maximum: 100
+    id:
+      name: id
+      in: path
+      description: Object id.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+  schemas:
+    UserNew:
+      type: object
+      required:
+        - username
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          example: "user"
+    User:
+      type: object
+      required:
+        - id
+        - username
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        username:
+          type: string
+          example: "user"
+    UsersList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    Pagination:
+      type: object
+      required:
+        - page
+        - per_page
+        - pages
+        - items
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 30
+        pages:
+          type: integer
+          example: 1
+        items:
+          type: integer
+          example: 1
+    Metadata:
+      type: object
+      required:
+        - pagination
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"

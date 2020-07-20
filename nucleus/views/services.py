@@ -13,4 +13,8 @@ def registration_service_routes(app):
         db.engine.execute('SELECT version();')
         return 'OK'
 
+    @app.route('/collapse', methods=['GET'])
+    def collapse():
+        raise Exception('Collapse!')
+
     return app

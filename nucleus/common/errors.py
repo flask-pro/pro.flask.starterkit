@@ -26,7 +26,7 @@ def register_errors(app: Flask):
         return {'code': 500, 'name': 'InternalDatabaseError',
                 'description': 'Common database error.'}, 500
 
-    @app.errorhandler(InternalServerError)
+    @app.errorhandler(Exception)
     def common_exception(exc):
         """Common exception for all errors."""
 

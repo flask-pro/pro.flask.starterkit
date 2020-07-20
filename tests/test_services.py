@@ -8,3 +8,9 @@ def test_check(fx_app):
     print('\n--> test_check')
     r = fx_app.get('/check')
     assert r.status_code == 200
+
+
+def test_collapse(fx_app):
+    print('\n--> test_collapse')
+    r = fx_app.get('/collapse')
+    assert r.status_code == 500

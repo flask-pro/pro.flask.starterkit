@@ -29,8 +29,8 @@ test_end:
 
 # Running.
 run: test_start
-	# Initial and run application for development.
-	./venv/bin/flask run
+	# Run application for development.
+	export PYTHONPATH=$$PYTHONPATH:nucleus; ./venv/bin/python nucleus/main.py
 
 run_test_instance: reset
 	# Run project in docker containers
