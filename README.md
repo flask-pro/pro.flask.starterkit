@@ -36,7 +36,12 @@
 `make test` также подсчитывает покрытие кода тестами.
 
 ## REST API
-В проект добавлен модуль connexion.
+Реализуется принцип "сначала спецификация", для этого используется модуль connexion. В проект добавлена спецификация в формате OpenAPI 3.
+
+## Служебные эндпоинты
+* `GET /index` - маршрутная функция для формирования главной страницы. Используется шаблонизатор Jinja2.
+* `GET /check` - проверка работоспособности приложения, при вызове данного эндпоинта проверяется работоспособность базы данных и приложения в целом.
+* `GET /collapse` - вызывает исключение для проверки работы системы обработки ошибок.
 
 ## Что внутри?
 * Запуск различных инструментов необходимых в процессе разработки производится с помощью [Makefile](https://ru.wikipedia.org/wiki/Makefile).
@@ -51,13 +56,13 @@
 * Запуск проекта в контейнерах для формирования stage-релиза.
 
 ## Дополнительные ресурсы
-* Python
-* Docker
-* Docker-compose
-* OpenAPI
-* Connexion
-* Flask
-* SQLAlchemy
-* Pytest
-* PostgreSQL
-* Jinja2
+* [Python](https://docs.python.org/3/)
+* [Docker](https://docs.docker.com/)
+* [Docker-compose](https://docs.docker.com/compose/)
+* [OpenAPI](https://swagger.io/docs/specification/about/)
+* [Connexion](https://connexion.readthedocs.io/en/latest/index.html)
+* [Flask](https://flask.palletsprojects.com/en/1.1.x/)
+* [SQLAlchemy](https://docs.sqlalchemy.org/en/13/)
+* [Pytest](https://docs.pytest.org/en/stable/contents.html)
+* [PostgreSQL](https://postgrespro.ru/docs/postgresql/12/index)
+* [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/)
