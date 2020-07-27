@@ -6,9 +6,74 @@ info:
 servers:
   - url: 'https://api.flask.pro'
 tags:
+  - name: auth
+    description: Autorization and autentication.
   - name: users
     description: Manage users.
 paths:
+  /signup:
+    post:
+      tags:
+        - auth
+      summary: Registration in system
+      operationId: nucleus.views.auth.signup
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Signup"
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Return secret string
+      operationId: nucleus.views.auth.login
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+      security:
+        - basic: []
+  /profile:
+    get:
+      tags:
+        - auth
+      summary: Return user profile
+      operationId: nucleus.views.auth.profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - jwt: []
+  /renew:
+    put:
+      tags:
+        - auth
+      summary: Return new secret string
+      operationId: nucleus.views.auth.renew
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+      security:
+        - jwt: []
   /users:
     get:
       tags:
@@ -26,6 +91,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UsersList"
+      security:
+        - jwt: []
     post:
       tags:
         - users
@@ -84,6 +151,83 @@ paths:
       responses:
         '204':
           description: OK
+  /roles:
+    get:
+      tags:
+        - users
+      operationId: nucleus.views.users.get_roles_list
+      summary: Returns a list of roles
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RolesList"
+      security:
+        - jwt: []
+    post:
+      tags:
+        - users
+      operationId: nucleus.views.users.create_role
+      summary: Create role
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleNew"
+        required: true
+  /roles/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - users
+      operationId: nucleus.views.users.get_role
+      summary: Get role
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+    put:
+      tags:
+        - users
+      operationId: nucleus.views.users.update_role
+      summary: Update role
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+    delete:
+      tags:
+        - users
+      operationId: nucleus.views.users.delete_role
+      summary: Delete role
+      responses:
+        '204':
+          description: OK
 components:
   parameters:
     include_metadata:
@@ -120,13 +264,47 @@ components:
         minimum: 1
         example: 1
   schemas:
+    Token:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+      additionalProperties: false
+      properties:
+        access_token:
+          type: string
+          example: "token"
+        refresh_token:
+          type: string
+          example: "token"
+    Signup:
+      type: object
+      required:
+        - username
+        - password
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          example: "user"
+        password:
+          type: string
+          example: "secret"
     UserNew:
       type: object
       required:
         - username
+        - password
+        - role
       additionalProperties: false
       properties:
         username:
+          type: string
+          example: "user"
+        password:
+          type: string
+          example: "secret"
+        role:
           type: string
           example: "user"
     User:
@@ -154,6 +332,46 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/User"
+    RoleNew:
+      type: object
+      required:
+        - name
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "user"
+        description:
+          type: string
+          example: "user"
+    Role:
+      type: object
+      required:
+        - id
+        - name
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        name:
+          type: string
+          example: "user"
+        description:
+          type: string
+          example: "user"
+    RolesList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
     Pagination:
       type: object
       required:
@@ -181,3 +399,13 @@ components:
       properties:
         pagination:
           $ref: "#/components/schemas/Pagination"
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: nucleus.views.auth.basic_auth
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: nucleus.views.auth.decode_token

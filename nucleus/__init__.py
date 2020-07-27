@@ -10,6 +10,7 @@ from nucleus.common.logging import logging_configuration
 from nucleus.config import Config
 from nucleus.models import db
 from nucleus.views.services import registration_service_routes
+from nucleus.common.load_data import load_init_data
 
 
 def create_app(config_app: Type[Config]):
@@ -47,6 +48,7 @@ def create_app(config_app: Type[Config]):
                 time.sleep(1)
 
         db.create_all()
+        load_init_data()
         app.logger.info('Database created!')
 
     return app_conn

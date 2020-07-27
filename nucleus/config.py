@@ -28,3 +28,10 @@ class Config:
     # Pagination.
     ITEMS_PER_PAGE = 30
     MAX_PER_PAGE = 100
+
+    # Authorization.
+    JWT_ISSUER = 'pro.flask.starterkit'
+    JWT_SECRET = 'obTVtYBgPXqeFSW47S1eyFG9o7A1gaPKoJLZj2OFKXqeApBjbLdenU8COlJZB1kuIzKt6EmQjrD3D6ws6IWLOY5MFLJrdE5Ip7AG8SaR89mCYm5xt2mCwIrF8BgQUtSa'
+    JWT_ACCESS_TOKEN_LIFETIME = 60*60
+    JWT_REFRESH_TOKEN_LIFETIME = 30*24*60*60
+    JWT_ALGORITHM = 'HS256'

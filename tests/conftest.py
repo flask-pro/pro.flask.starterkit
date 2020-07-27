@@ -1,3 +1,4 @@
+import base64
 import os
 import subprocess
 
@@ -36,9 +37,9 @@ def fx_app():
 
 
 @pytest.fixture()
-def fx_user(fx_app):
+def fx_user_admin(fx_app):
     print('\n-> fx_user')
-    new_user = {'username': 'fixture_user'}
+    new_user = {'username': 'fixture_user_admin', 'password': 'fixture_password', 'role': 'admin'}
     r = fx_app.post('/v1/users', json=new_user)
     assert r.status_code == 201
 
@@ -46,3 +47,14 @@ def fx_user(fx_app):
 
     r_delete = fx_app.delete(f'/v1/users/{r.json["id"]}')
     assert r_delete.status_code == 204
+
+
+@pytest.fixture()
+def fx_auth_admin(fx_app, fx_user_admin):
+    print('\n-> fx_auth_admin')
+    headers = {'Authorization': 'Basic {}'.format(
+        base64.b64encode(f'{fx_user_admin["username"]}:fixture_password'.encode()).decode())}
+    r = fx_app.post('/v1/login', headers=headers)
+    assert r.status_code == 201
+
+    yield {'Authorization': f'Bearer {r.json["access_token"]}'}

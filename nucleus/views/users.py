@@ -1,7 +1,7 @@
 import connexion
 from flask import request
 
-from nucleus.controllers.users import User
+from nucleus.controllers.users import User, Role
 
 
 def get_users_list():
@@ -21,5 +21,24 @@ def update_user(id):
 
 
 def delete_user(id):
-    User.delete(id)
-    return '', 204
+    return User.delete(id), 204
+
+
+def get_roles_list():
+    return Role.roles_list(connexion.request.args)
+
+
+def create_role():
+    return Role.create(request.json), 201
+
+
+def get_role(id):
+    return Role.get(id)
+
+
+def update_role(id):
+    return Role.update(id, request.json)
+
+
+def delete_role(id):
+    return Role.delete(id), 204
