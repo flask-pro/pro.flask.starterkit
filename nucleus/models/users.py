@@ -85,7 +85,7 @@ class Roles(Base):
         return Roles.query.filter_by(id=id_).delete()
 
     @classmethod
-    def bulk_create(cls, roles: dict) -> list:
+    def bulk_create(cls, roles: list) -> list:
         role_objects = []
         for role in roles:
             new_role = Roles(**role)
