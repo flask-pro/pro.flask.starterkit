@@ -77,6 +77,7 @@ class Roles(Base):
     def update(cls, role: dict):
         new_role = Roles.query.filter_by(id=role['id']).one()
         new_role.name = role['name']
+        new_role.description = role['description']
         db.session.commit()
         return new_role.to_dict()
 

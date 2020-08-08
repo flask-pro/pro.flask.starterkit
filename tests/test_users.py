@@ -82,3 +82,55 @@ def test_users__bad_id(fx_app, fx_auth_admin):
 
     r_delete = fx_app.delete('/v1/users/1234567890', headers=fx_auth_admin)
     assert r_delete.status_code == 404
+
+
+def test_roles__crud(fx_app, fx_auth_admin):
+    print('\n--> test_roles__crud')
+    new_role = {'name': 'test_crud_role', 'description': 'test_crud_role_description'}
+
+    r_create = fx_app.post('/v1/roles', headers=fx_auth_admin, json=new_role)
+    assert r_create.status_code == 201
+    assert 'id' in r_create.json
+    assert r_create.json['name'] == new_role['name']
+    assert r_create.json['description'] == new_role['description']
+
+    r_get = fx_app.get(f'/v1/roles/{r_create.json["id"]}', headers=fx_auth_admin)
+    assert r_get.status_code == 200
+    assert r_get.json['id'] == r_create.json['id']
+    assert r_get.json['name'] == r_create.json['name']
+    assert r_get.json['description'] == r_create.json['description']
+
+    updated_role = {'id': r_create.json["id"], 'name': 'updated_test_role',
+                    'description': 'test_updated_role_description'}
+    r_update = fx_app.put(f'/v1/roles/{r_create.json["id"]}', headers=fx_auth_admin,
+                          json=updated_role)
+    assert r_update.status_code == 200
+    assert r_update.json['id'] == r_create.json['id']
+    assert r_update.json['name'] == updated_role['name']
+    assert r_update.json['description'] == updated_role['description']
+
+    r_delete = fx_app.delete(f'/v1/roles/{r_create.json["id"]}', headers=fx_auth_admin)
+    assert r_delete.status_code == 204
+    assert not r_delete.data
+
+
+@pytest.mark.parametrize('page', [1, None])
+@pytest.mark.parametrize('per_page', [1, None])
+@pytest.mark.parametrize('include_metadata', [True, None])
+def test_roles__list(fx_app, fx_auth_admin, page, per_page, include_metadata):
+    print('\n--> test_roles__list')
+
+    query_string = {}
+    if page:
+        query_string['page'] = page
+    if per_page:
+        query_string['per_page'] = per_page
+    if include_metadata:
+        query_string['include_metadata'] = include_metadata
+
+    r_get = fx_app.get('/v1/roles', headers=fx_auth_admin, query_string=query_string)
+    assert r_get.status_code == 200
+    assert r_get.json
+    assert r_get.json['items']
+    if include_metadata:
+        assert r_get.json['_metadata']
