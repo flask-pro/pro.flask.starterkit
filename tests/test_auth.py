@@ -41,11 +41,30 @@ def test_auth__crud(fx_app):
 @pytest.mark.parametrize('payload', [
     ({'username': 'BAD_USER'}),
     ({'password': 'BAD_PASSWORD'}),
+    ({'username': 'BAD_USER', 'password': 'BAD_PASSWORD'}),
+    ({'username': 'admin', 'password': 'BAD_PASSWORD'}),
+])
+def test_auth__wrong_login_password(fx_app, payload):
+    print('\n--> test_auth__wrong_login_password')
+    headers = {
+        'Authorization': 'Basic {}'.format(
+            base64.b64encode(
+                f'{payload.get("username")}:{payload.get("password")}'.encode()
+            ).decode()
+        )
+    }
+    assert fx_app.post('/v1/login', headers=headers).status_code == 400
+
+
+@pytest.mark.parametrize('payload', [
+    ({'username': 'BAD_USER'}),
+    ({'password': 'BAD_PASSWORD'}),
     ({'username': 'BAD_USER', 'password': 'BAD_PASSWORD', 'BAD_KEY': 'BAD_VALUE'}),
 ])
 def test_auth__error_400(fx_app, payload):
     print('\n--> test_auth__error_400')
     assert fx_app.post('/v1/signup', json=payload).status_code == 400
+
 
 def test_auth__double_signup(fx_app):
     print('\n--> test_auth__double_signup')
