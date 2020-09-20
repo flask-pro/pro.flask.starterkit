@@ -7,16 +7,16 @@ from nucleus.models.base import Base
 
 
 class Users(Base):
-    username = db.Column(db.String, nullable=False, unique=True, comment='Username')
-    password_hash = db.Column(db.String, nullable=False, comment='Password')
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    username = db.Column(db.String, nullable=False, unique=True, comment="Username")
+    password_hash = db.Column(db.String, nullable=False, comment="Password")
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
 
     @property
-    def password(self):
-        raise AttributeError('Password is not a readable attribute.')
+    def password(self) -> None:
+        raise AttributeError("Password is not a readable attribute.")
 
     @password.setter
-    def password(self, password):
+    def password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
     @classmethod
@@ -31,31 +31,28 @@ class Users(Base):
         return create_user.to_dict()
 
     @classmethod
-    def get(cls, id_: int):
+    def get(cls, id_: int) -> dict:
         user = Users.query.filter_by(id=id_).one()
         return user.to_dict()
 
     @classmethod
-    def update(cls, user: dict):
-        new_user = Users.query.filter_by(id=user['id']).one()
-        new_user.username = user['username']
+    def update(cls, user: dict) -> dict:
+        new_user = Users.query.filter_by(id=user["id"]).one()
+        new_user.username = user["username"]
         db.session.commit()
         return new_user.to_dict()
 
     @classmethod
-    def delete(cls, id_: int):
+    def delete(cls, id_: int) -> None:
         return Users.query.filter_by(id=id_).delete()
 
     def to_dict(self) -> dict:
-        return {
-            'id': self.id,
-            'username': self.username,
-        }
+        return {"id": self.id, "username": self.username}
 
 
 class Roles(Base):
-    name = db.Column(db.String, nullable=False, comment='Username')
-    users = db.relationship('Users', backref='roles')
+    name = db.Column(db.String, nullable=False, comment="Username")
+    users = db.relationship("Users", backref="roles")
 
     @classmethod
     def create(cls, role: dict) -> dict:
@@ -69,20 +66,20 @@ class Roles(Base):
         return create_role.to_dict()
 
     @classmethod
-    def get(cls, id_: int):
+    def get(cls, id_: int) -> dict:
         role = Roles.query.filter_by(id=id_).one()
         return role.to_dict()
 
     @classmethod
-    def update(cls, role: dict):
-        new_role = Roles.query.filter_by(id=role['id']).one()
-        new_role.name = role['name']
-        new_role.description = role['description']
+    def update(cls, role: dict) -> dict:
+        new_role = Roles.query.filter_by(id=role["id"]).one()
+        new_role.name = role["name"]
+        new_role.description = role["description"]
         db.session.commit()
         return new_role.to_dict()
 
     @classmethod
-    def delete(cls, id_: int):
+    def delete(cls, id_: int) -> None:
         return Roles.query.filter_by(id=id_).delete()
 
     @classmethod
@@ -96,8 +93,4 @@ class Roles(Base):
         return [_.to_dict() for _ in role_objects]
 
     def to_dict(self) -> dict:
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-        }
+        return {"id": self.id, "name": self.name, "description": self.description}

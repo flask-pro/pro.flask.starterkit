@@ -112,7 +112,7 @@ paths:
               $ref: "#/components/schemas/UserNew"
         required: true
       security:
-          - jwt: []
+        - jwt: []
   /users/{id}:
     parameters:
       - $ref: "#/components/parameters/id"
@@ -158,7 +158,7 @@ paths:
         '204':
           description: OK
       security:
-          - jwt: []
+        - jwt: []
   /roles:
     get:
       tags:
@@ -197,7 +197,7 @@ paths:
               $ref: "#/components/schemas/RoleNew"
         required: true
       security:
-          - jwt: []
+        - jwt: []
   /roles/{id}:
     parameters:
       - $ref: "#/components/parameters/id"
@@ -243,7 +243,7 @@ paths:
         '204':
           description: OK
       security:
-          - jwt: []
+        - jwt: []
 components:
   parameters:
     include_metadata:
