@@ -10,28 +10,23 @@ reset:
 	docker-compose -f docker-compose.yml down --volumes --remove-orphans
 	docker-compose -f docker-compose.stage.yml down --volumes --remove-orphans
 
-# Testing.
-test_start: reset
-	# Run database for tests.
+run_db: reset
+	# Run container with database.
 	docker-compose -f docker-compose.yml up -d --build
 
-test_run:
+test:
 	# Run pytest.
 	./venv/bin/pytest --cov=nucleus tests/
 
-test: test_start test_run reset
-	# Run tests.
-	echo Test finished!
-
-test_end:
-	# Run tests.
-	docker-compose -f docker-compose.yml down --volumes
-
 # Running.
-run: test_start
+run: run_db
 	# Run application for development.
 	export PYTHONPATH=$$PYTHONPATH:nucleus; ./venv/bin/python nucleus/main.py
 
 run_test_instance: reset
 	# Run project in docker containers
 	docker-compose -f docker-compose.stage.yml up --build
+
+format:
+	# Run checking and formatting sources.
+	./venv/bin/pre-commit run -a
