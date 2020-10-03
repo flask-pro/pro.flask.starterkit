@@ -37,3 +37,30 @@ class Items:
             items["_metadata"] = self._metadata
 
         return items
+
+
+class ModelManager:
+    def __init__(self, model: db.Model):
+        self._model = model
+
+    def create(self, params: dict) -> db.Model:
+        new_row = self._model(**params)
+        db.session.add(new_row)
+        db.session.commit()
+        return new_row
+
+    def get(self, id_: str) -> db.Model:
+        return self._model.query.filter_by(id=id_).one()
+
+    def update(self, id_: str, params: dict) -> db.Model:
+        return self.patch(id_, params)
+
+    def patch(self, id_: str, params: dict) -> db.Model:
+        row = self._model.query.filter_by(id=id_).one()
+        for key, value in params.items():
+            setattr(row, key, value)
+        db.session.commit()
+        return row
+
+    def delete(self, id_: str) -> None:
+        return self._model.query.filter_by(id=id_).delete()

@@ -2,19 +2,24 @@ from flask import abort
 from flask import current_app
 
 from nucleus.controllers.utils import Items
-from nucleus.models.users import Roles
-from nucleus.models.users import Users
+from nucleus.controllers.utils import ModelManager
+from nucleus.models.users import Roles as RolesModel
+from nucleus.models.users import Users as UsersModel
 
 
 class User:
     """Management of the user."""
+
+    TABLE_MODEL = ModelManager(UsersModel)
 
     @staticmethod
     def users_list(parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
         MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 
-        users_list = Items(model=Users, include_metadata=parameters.get("include_metadata", False))
+        users_list = Items(
+            model=UsersModel, include_metadata=parameters.get("include_metadata", False)
+        )
         users_list.ITEMS_PER_PAGE = ITEMS_PER_PAGE
         users_list.MAX_PER_PAGE = MAX_PER_PAGE
         users_list = users_list.result(
@@ -26,28 +31,28 @@ class User:
     @classmethod
     def create(cls, user: dict) -> dict:
         if not user.get("role"):
-            role = Roles.query.filter_by(name="user").first()
+            role = RolesModel.query.filter_by(name="user").first()
             user = {**user, "role_id": role.id}
         else:
-            role = Roles.query.filter_by(name=user["role"]).first()
+            role = RolesModel.query.filter_by(name=user["role"]).first()
             del user["role"]
             user = {**user, "role_id": role.id}
 
-        return Users.create(user)
+        return cls.TABLE_MODEL.create(user).to_dict()
 
     @classmethod
-    def get(cls, id_: int) -> dict:
-        return Users.get(id_)
+    def get(cls, id_: str) -> dict:
+        return cls.TABLE_MODEL.get(id_).to_dict()
 
     @classmethod
-    def update(cls, id_: int, user: dict) -> dict:
+    def update(cls, id_: str, user: dict) -> dict:
         if id_ != user.get("id"):
             abort(400, "ID is required!")
-        return Users.update(user)
+        return cls.TABLE_MODEL.update(id_, user).to_dict()
 
     @classmethod
-    def delete(cls, id_: int) -> dict:
-        if Users.delete(id_):
+    def delete(cls, id_: str) -> dict:
+        if cls.TABLE_MODEL.delete(id_):
             return ""
         else:
             abort(404, "Object not found!")
@@ -56,12 +61,16 @@ class User:
 class Role:
     """Management of the role."""
 
+    TABLE_MODEL = ModelManager(RolesModel)
+
     @staticmethod
     def roles_list(parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
         MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 
-        roles_list = Items(model=Roles, include_metadata=parameters.get("include_metadata", False))
+        roles_list = Items(
+            model=RolesModel, include_metadata=parameters.get("include_metadata", False)
+        )
         roles_list.ITEMS_PER_PAGE = ITEMS_PER_PAGE
         roles_list.MAX_PER_PAGE = MAX_PER_PAGE
         roles_list = roles_list.result(
@@ -72,21 +81,21 @@ class Role:
 
     @classmethod
     def create(cls, role: dict) -> dict:
-        return Roles.create(role)
+        return cls.TABLE_MODEL.create(role).to_dict()
 
     @classmethod
-    def get(cls, id_: int) -> dict:
-        return Roles.get(id_)
+    def get(cls, id_: str) -> dict:
+        return cls.TABLE_MODEL.get(id_).to_dict()
 
     @classmethod
-    def update(cls, id_: int, role: dict) -> dict:
+    def update(cls, id_: str, role: dict) -> dict:
         if id_ != role.get("id"):
             abort(400, "ID is required!")
-        return Roles.update(role)
+        return cls.TABLE_MODEL.update(id_, role).to_dict()
 
     @classmethod
-    def delete(cls, id_: int) -> dict:
-        if Roles.delete(id_):
+    def delete(cls, id_: str) -> dict:
+        if cls.TABLE_MODEL.delete(id_):
             return ""
         else:
             abort(404, "Object not found!")
