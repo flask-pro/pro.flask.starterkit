@@ -1,5 +1,5 @@
 from flask import current_app
-from werkzeug.exceptions import UnprocessableEntity
+from sqlalchemy.exc import IntegrityError
 
 from nucleus.controllers.users import User
 from nucleus.models.users import Roles
@@ -17,6 +17,6 @@ def load_init_data() -> bool:
     Roles.bulk_create(roles)
     try:
         User.create(user_admin)
-    except UnprocessableEntity as err:
-        current_app.logger.info(f"Load init data | error load user | {err}")
+    except IntegrityError as err:
+        current_app.logger.info(f"Load init data | error load user | {repr(err)}")
     return True

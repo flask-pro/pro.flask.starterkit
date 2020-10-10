@@ -24,7 +24,7 @@ def register_errors(app: Flask) -> Flask:
     """Registering handlers for common errors."""
 
     @app.errorhandler(NoResultFound)
-    def obj_non_exist_in_db_exception(exc):
+    def obj_non_exist_in_db_exception(exc) -> Tuple:
         """Exception for non exist object in db."""
         return {"code": 404, "name": "Not Found", "description": "Object not found."}, 404
 

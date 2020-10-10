@@ -1,3 +1,5 @@
+import os
+import sys
 import time
 from logging.config import dictConfig
 from typing import Type
@@ -39,16 +41,32 @@ def create_app(config_app: Type[Config]) -> connexion:
 
     # Create tables in database.
     with app.app_context():
-        for i in range(10):
+        for _ in range(10):
             try:
                 db.engine.execute("SELECT version();")
                 break
             except SQLAlchemyError as err:
                 app.logger.warning(f"Database not available: {err}!")
                 time.sleep(1)
+        try:
+            db.create_all()
+            load_init_data()
+            app.logger.info("Database created!")
+        except SQLAlchemyError as err:
+            app.logger.warning(f"Database not created: {err}!")
+            sys.exit()
 
-        db.create_all()
-        load_init_data()
-        app.logger.info("Database created!")
+    # Create folder for files.
+    for _ in range(3):
+        try:
+            os.mkdir(app.config["FILES_BASE_DIR"])
+            app.logger.info("Folder for files created!")
+            break
+        except FileExistsError:
+            app.logger.info("Folder for files exist!")
+            break
+        except Exception as err:
+            app.logger.warning(f"Folder for files not available: {err}!")
+            sys.exit()
 
     return app_conn

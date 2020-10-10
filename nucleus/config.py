@@ -36,3 +36,20 @@ class Config:
     JWT_ACCESS_TOKEN_LIFETIME = 60 * 60
     JWT_REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60
     JWT_ALGORITHM = "HS256"
+
+    # Files.
+    FILES_BASE_DIR = os.path.join(BASE_DIR, "files")
+    MAX_CONTENT_LENGTH = 128 * 1024 * 1024
+    ALLOWED_EXTENSIONS = {
+        "txt",
+        "pdf",
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "svg",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+    }

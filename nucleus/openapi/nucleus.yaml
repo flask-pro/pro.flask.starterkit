@@ -10,6 +10,8 @@ tags:
     description: Autorization and autentication.
   - name: users
     description: Manage users.
+  - name: files
+    description: Manage files.
 paths:
   /signup:
     post:
@@ -244,6 +246,94 @@ paths:
           description: OK
       security:
         - jwt: []
+  /files:
+    get:
+      tags:
+        - files
+      summary: Returns a list of files
+      operationId: nucleus.views.files.file_list
+      security:
+        - jwt: []
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilesList"
+    post:
+      tags:
+        - files
+      operationId: nucleus.views.files.upload_file
+      summary: Upload files
+      security:
+        - jwt: []
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+        description: File to upload to the server.
+  /files/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - files
+      summary: Getting information about a file.
+      operationId: nucleus.views.files.get_file
+      security:
+        - jwt: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+    delete:
+      tags:
+        - files
+      operationId: nucleus.views.files.delete_file
+      summary: Deleting a file
+      security:
+        - jwt: []
+      responses:
+        "204":
+          description: OK
+  /files/download/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - files
+      summary: Download a file
+      operationId: nucleus.views.files.download_file
+      security:
+        - jwt: []
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
 components:
   parameters:
     include_metadata:
@@ -280,6 +370,12 @@ components:
         minimum: 1
         example: 1
   schemas:
+    ID:
+      type: integer
+      minimum: 1
+      maximum: 10000000000
+      example: 1
+      description: "ID object in system."
     Token:
       type: object
       required:
@@ -331,9 +427,7 @@ components:
       additionalProperties: false
       properties:
         id:
-          type: integer
-          minimum: 1
-          example: 1
+          $ref: "#/components/schemas/ID"
         username:
           type: string
           example: "user"
@@ -368,9 +462,7 @@ components:
       additionalProperties: false
       properties:
         id:
-          type: integer
-          minimum: 1
-          example: 1
+          $ref: "#/components/schemas/ID"
         name:
           type: string
           example: "user"
@@ -388,6 +480,47 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Role"
+    File:
+      type: object
+      required:
+        - id
+        - name
+        - length
+        - mime_type
+        - url
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          format: path
+          example: image.png
+          description: "File name"
+        length:
+          type: number
+          format: int
+          example: 1024
+          description: "File size in bytes."
+        mime_type:
+          type: string
+          example: image/png
+          description: "MIME type"
+        url:
+          type: string
+          example: 'https://example.com/v1/files/download/12345'
+          description: "Link to download the file."
+    FilesList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: "#/components/schemas/Metadata"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/File"
     Pagination:
       type: object
       required:

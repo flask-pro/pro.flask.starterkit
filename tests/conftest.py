@@ -5,12 +5,13 @@ import docker
 import pytest
 from docker import DockerClient
 from docker.models.containers import Container
-from flask import Flask
+from flask.testing import FlaskClient
 
 from .config import TestConfig
 from nucleus import create_app
 
-tests_basedir = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = TestConfig.BASE_DIR
+FILES_URL = TestConfig.FILES_URL
 
 
 def _stop_database_container(docker_client: DockerClient, container_name: str) -> Container:
@@ -43,7 +44,7 @@ def _run_database_container(docker_client: DockerClient, container_name: str) ->
 
 
 @pytest.fixture(scope="session")
-def fx_app() -> Flask:
+def fx_app() -> FlaskClient:
     print("\n-> fx_app")
 
     # Return a docker client.
@@ -67,7 +68,7 @@ def fx_app() -> Flask:
     print("-> Teardown fx_app.")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def fx_auth_admin(fx_app) -> dict:
     print("\n-> fx_auth_admin")
     user = {"username": "admin", "password": "secret", "role": "admin"}
@@ -80,3 +81,23 @@ def fx_auth_admin(fx_app) -> dict:
     assert r.status_code == 201
 
     yield {"Authorization": f'Bearer {r.json["access_token"]}'}
+
+
+@pytest.fixture(scope="session")
+def fx_test_file(fx_app, fx_auth_admin) -> dict:
+    print("\n-> fx_test_file")
+    file_path = os.path.join(BASE_DIR, "content", "floppy.jpg")
+    r_post = fx_app.post(
+        FILES_URL,
+        headers={
+            "Content-Type": "multipart/form-data",
+            "Authorization": fx_auth_admin["Authorization"],
+        },
+        data={"file": open(file_path, "rb")},
+    )
+    assert r_post.status_code == 201
+
+    yield r_post.json
+
+    r_del = fx_app.delete(f'{FILES_URL}/{r_post.json["id"]}', headers=fx_auth_admin)
+    assert r_del.status_code == 204
