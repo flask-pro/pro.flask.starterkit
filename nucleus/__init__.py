@@ -12,7 +12,6 @@ from nucleus.common.load_data import load_init_data
 from nucleus.common.logging import logging_configuration
 from nucleus.config import Config
 from nucleus.models import db
-from nucleus.views.services import registration_service_routes
 
 
 def create_app(config_app: Type[Config]) -> connexion:
@@ -34,7 +33,9 @@ def create_app(config_app: Type[Config]) -> connexion:
     db.init_app(app)
 
     # Registration routes.
-    registration_service_routes(app)
+    from nucleus.views.services import services
+
+    app.register_blueprint(services)
 
     # Registration handlers.
     register_errors(app)

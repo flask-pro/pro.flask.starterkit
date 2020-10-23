@@ -18,7 +18,7 @@ paths:
       tags:
         - auth
       summary: Registration in system
-      operationId: nucleus.views.auth.signup
+      operationId: nucleus.api.v1.auth.signup
       responses:
         '201':
           description: OK
@@ -36,7 +36,7 @@ paths:
       tags:
         - auth
       summary: Return secret string
-      operationId: nucleus.views.auth.login
+      operationId: nucleus.api.v1.auth.login
       responses:
         '201':
           description: OK
@@ -51,7 +51,7 @@ paths:
       tags:
         - auth
       summary: Return user profile
-      operationId: nucleus.views.auth.profile
+      operationId: nucleus.api.v1.auth.profile
       responses:
         '200':
           description: OK
@@ -66,7 +66,7 @@ paths:
       tags:
         - auth
       summary: Return new secret string
-      operationId: nucleus.views.auth.renew
+      operationId: nucleus.api.v1.auth.renew
       responses:
         '200':
           description: OK
@@ -80,7 +80,7 @@ paths:
     get:
       tags:
         - users
-      operationId: nucleus.views.users.get_users_list
+      operationId: nucleus.api.v1.users.get_users_list
       summary: Returns a list of users
       parameters:
         - $ref: "#/components/parameters/include_metadata"
@@ -98,7 +98,7 @@ paths:
     post:
       tags:
         - users
-      operationId: nucleus.views.users.create_user
+      operationId: nucleus.api.v1.users.create_user
       summary: Create user
       responses:
         "201":
@@ -121,7 +121,7 @@ paths:
     get:
       tags:
         - users
-      operationId: nucleus.views.users.get_user
+      operationId: nucleus.api.v1.users.get_user
       summary: Get user
       responses:
         '200':
@@ -135,7 +135,7 @@ paths:
     put:
       tags:
         - users
-      operationId: nucleus.views.users.update_user
+      operationId: nucleus.api.v1.users.update_user
       summary: Update user
       responses:
         '200':
@@ -154,7 +154,7 @@ paths:
     delete:
       tags:
         - users
-      operationId: nucleus.views.users.delete_user
+      operationId: nucleus.api.v1.users.delete_user
       summary: Delete user
       responses:
         '204':
@@ -165,7 +165,7 @@ paths:
     get:
       tags:
         - users
-      operationId: nucleus.views.users.get_roles_list
+      operationId: nucleus.api.v1.users.get_roles_list
       summary: Returns a list of roles
       parameters:
         - $ref: "#/components/parameters/include_metadata"
@@ -183,7 +183,7 @@ paths:
     post:
       tags:
         - users
-      operationId: nucleus.views.users.create_role
+      operationId: nucleus.api.v1.users.create_role
       summary: Create role
       responses:
         "201":
@@ -206,7 +206,7 @@ paths:
     get:
       tags:
         - users
-      operationId: nucleus.views.users.get_role
+      operationId: nucleus.api.v1.users.get_role
       summary: Get role
       responses:
         '200':
@@ -220,7 +220,7 @@ paths:
     put:
       tags:
         - users
-      operationId: nucleus.views.users.update_role
+      operationId: nucleus.api.v1.users.update_role
       summary: Update role
       responses:
         '200':
@@ -239,7 +239,7 @@ paths:
     delete:
       tags:
         - users
-      operationId: nucleus.views.users.delete_role
+      operationId: nucleus.api.v1.users.delete_role
       summary: Delete role
       responses:
         '204':
@@ -251,7 +251,7 @@ paths:
       tags:
         - files
       summary: Returns a list of files
-      operationId: nucleus.views.files.file_list
+      operationId: nucleus.api.v1.files.file_list
       security:
         - jwt: []
       parameters:
@@ -268,7 +268,7 @@ paths:
     post:
       tags:
         - files
-      operationId: nucleus.views.files.upload_file
+      operationId: nucleus.api.v1.files.upload_file
       summary: Upload files
       security:
         - jwt: []
@@ -296,7 +296,7 @@ paths:
       tags:
         - files
       summary: Getting information about a file.
-      operationId: nucleus.views.files.get_file
+      operationId: nucleus.api.v1.files.get_file
       security:
         - jwt: []
       responses:
@@ -309,7 +309,7 @@ paths:
     delete:
       tags:
         - files
-      operationId: nucleus.views.files.delete_file
+      operationId: nucleus.api.v1.files.delete_file
       summary: Deleting a file
       security:
         - jwt: []
@@ -323,7 +323,7 @@ paths:
       tags:
         - files
       summary: Download a file
-      operationId: nucleus.views.files.download_file
+      operationId: nucleus.api.v1.files.download_file
       security:
         - jwt: []
       responses:
@@ -552,9 +552,9 @@ components:
     basic:
       type: http
       scheme: basic
-      x-basicInfoFunc: nucleus.views.auth.basic_auth
+      x-basicInfoFunc: nucleus.api.v1.auth.basic_auth
     jwt:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      x-bearerInfoFunc: nucleus.views.auth.decode_token
+      x-bearerInfoFunc: nucleus.api.v1.auth.decode_token
