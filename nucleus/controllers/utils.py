@@ -57,10 +57,14 @@ class ModelManager:
 
     def patch(self, id_: str, params: dict) -> db.Model:
         row = self._model.query.filter_by(id=id_).one()
+        if params.get("id"):
+            del params["id"]
         for key, value in params.items():
             setattr(row, key, value)
         db.session.commit()
         return row
 
     def delete(self, id_: str) -> None:
-        return self._model.query.filter_by(id=id_).delete()
+        deleted_row_id = self._model.query.filter_by(id=id_).delete()
+        db.session.commit()
+        return deleted_row_id

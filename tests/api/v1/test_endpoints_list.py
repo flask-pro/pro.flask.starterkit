@@ -1,6 +1,6 @@
 import pytest
 
-from .config import TestConfig
+from tests.config import TestConfig
 
 USERS_URL = TestConfig.USERS_URL
 FILES_URL = TestConfig.FILES_URL

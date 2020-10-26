@@ -1,6 +1,6 @@
 import os
 
-from .config import TestConfig
+from tests.config import TestConfig
 
 BASE_DIR = TestConfig.BASE_DIR
 FILES_BASE_DIR = TestConfig.FILES_BASE_DIR

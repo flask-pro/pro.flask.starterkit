@@ -14,6 +14,7 @@ class Config:
 
     ENV = "development"
     DEBUG = os.getenv("FLASK_DEBUG") or 0
+    JSON_AS_ASCII = False
 
     # Database settings.
     PG_DB = os.environ["POSTGRES_DB"]

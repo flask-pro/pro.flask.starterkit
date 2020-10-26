@@ -1,5 +1,6 @@
 import base64
 import os
+from typing import Generator
 
 import docker
 import pytest
@@ -7,8 +8,8 @@ from docker import DockerClient
 from docker.models.containers import Container
 from flask.testing import FlaskClient
 
-from .config import TestConfig
 from nucleus import create_app
+from tests.config import TestConfig
 
 BASE_DIR = TestConfig.BASE_DIR
 FILES_URL = TestConfig.FILES_URL
@@ -17,7 +18,7 @@ FILES_URL = TestConfig.FILES_URL
 def _stop_database_container(docker_client: DockerClient, container_name: str) -> Container:
     db_container = docker_client.containers.get(container_name)
     db_container.stop()
-    db_container.remove()
+    db_container.remove(v=True)
     return db_container
 
 
@@ -44,13 +45,24 @@ def _run_database_container(docker_client: DockerClient, container_name: str) ->
 
 
 @pytest.fixture(scope="session")
-def fx_app() -> FlaskClient:
+def fx_docker() -> DockerClient:
+    """Returns a client object for accessing docker.
+
+    :return: docker client object
+    """
+    print("\n-> fx_docker")
+    return docker.client.from_env()
+
+
+@pytest.fixture(scope="session")
+def fx_app(fx_docker) -> Generator[FlaskClient, None, None]:
+    """Returns a flask object for accessing application.
+
+    :return: flask test client object
+    """
     print("\n-> fx_app")
 
-    # Return a docker client.
-    docker_client = docker.client.from_env()
-
-    _run_database_container(docker_client, TestConfig.PG_CONTAINER_NAME)
+    _run_database_container(fx_docker, TestConfig.PG_CONTAINER_NAME)
 
     # Init app for testing.
     app = create_app(TestConfig)
@@ -63,13 +75,17 @@ def fx_app() -> FlaskClient:
     # Stop app for testing.
     app_context.pop()
 
-    _run_database_container(docker_client, TestConfig.PG_CONTAINER_NAME)
+    _stop_database_container(fx_docker, TestConfig.PG_CONTAINER_NAME)
 
     print("-> Teardown fx_app.")
 
 
 @pytest.fixture(scope="session")
 def fx_auth_admin(fx_app) -> dict:
+    """Returns a header for authorization via `admin`.
+
+    :return: authorization header
+    """
     print("\n-> fx_auth_admin")
     user = {"username": "admin", "password": "secret", "role": "admin"}
     headers = {
@@ -80,11 +96,11 @@ def fx_auth_admin(fx_app) -> dict:
     r = fx_app.post("/v1/login", headers=headers)
     assert r.status_code == 201
 
-    yield {"Authorization": f'Bearer {r.json["access_token"]}'}
+    return {"Authorization": f'Bearer {r.json["access_token"]}'}
 
 
 @pytest.fixture(scope="session")
-def fx_test_file(fx_app, fx_auth_admin) -> dict:
+def fx_test_file(fx_app, fx_auth_admin) -> Generator[dict, None, None]:
     print("\n-> fx_test_file")
     file_path = os.path.join(BASE_DIR, "content", "floppy.jpg")
     r_post = fx_app.post(

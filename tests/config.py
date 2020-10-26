@@ -25,7 +25,10 @@ class TestConfig(Config):
     # Files.
     FILES_BASE_DIR = os.path.join(BASE_DIR, "files")
 
-    # Routes.
+    # API routes.
     FILES_URL = "/v1/files"
     ROLES_URL = "/v1/roles"
     USERS_URL = "/v1/users"
+
+    # Blueprints routes.
+    MAIN_URL = "/"

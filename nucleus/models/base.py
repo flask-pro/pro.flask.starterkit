@@ -4,7 +4,16 @@ from nucleus.models import db
 
 
 class Base(db.Model):
-    """Base class for table."""
+    """Base class for table.
+
+    * **id** - Integer - unique identifier
+
+    * **description** - Text - Description of the object
+
+    * **datetime_created** - DateTime - Date and time of row create
+
+    * **datetime_modified** - DateTime - Date and time of row update
+    """
 
     __abstract__ = True
 
