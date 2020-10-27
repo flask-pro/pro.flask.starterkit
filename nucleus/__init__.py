@@ -49,6 +49,7 @@ def create_app(config_app: Type[Config]) -> connexion:
             except SQLAlchemyError as err:
                 app.logger.warning(f"Database not available: {err}!")
                 time.sleep(1)
+
         try:
             db.create_all()
             load_init_data()
