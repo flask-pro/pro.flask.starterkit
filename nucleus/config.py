@@ -1,10 +1,6 @@
 import os
 
-from dotenv import load_dotenv
-
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-load_dotenv(os.path.join(basedir, "..", ".env"))
 
 
 class Config:
@@ -12,7 +8,7 @@ class Config:
 
     BASE_DIR = basedir
 
-    ENV = "development"
+    ENV = os.getenv("FLASK_ENV") or "development"
     DEBUG = os.getenv("FLASK_DEBUG") or 0
     JSON_AS_ASCII = False
 
@@ -33,7 +29,7 @@ class Config:
 
     # Authorization.
     JWT_ISSUER = "pro.flask.starterkit"
-    JWT_SECRET = "obTVtYBgPXqeFSW47S1WLOY5MFLJrdE5Ip7j8387qywfgtfGUIhAG8SaR89mCYm5xt2mCwIrF8BgQUtSa"
+    JWT_SECRET = os.environ["JWT_SECRET"]
     JWT_ACCESS_TOKEN_LIFETIME = 60 * 60
     JWT_REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60
     JWT_ALGORITHM = "HS256"

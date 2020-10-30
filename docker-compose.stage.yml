@@ -10,9 +10,9 @@ services:
             - stage_net
         logging:
             driver: none
-    stage_back:
-        container_name: stage_back
-        build: ./nucleus
+    stage_app:
+        container_name: stage_app
+        image: "nucleus:latest"
         env_file: stage.env
         ports:
             - "127.0.0.1:8010:5000"

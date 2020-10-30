@@ -1,11 +1,9 @@
 import base64
 import os
+import subprocess
 from typing import Generator
 
-import docker
 import pytest
-from docker import DockerClient
-from docker.models.containers import Container
 from flask.testing import FlaskClient
 
 from nucleus import create_app
@@ -15,54 +13,18 @@ BASE_DIR = TestConfig.BASE_DIR
 FILES_URL = TestConfig.FILES_URL
 
 
-def _stop_database_container(docker_client: DockerClient, container_name: str) -> Container:
-    db_container = docker_client.containers.get(container_name)
-    db_container.stop()
-    db_container.remove(v=True)
-    return db_container
-
-
-def _run_database_container(docker_client: DockerClient, container_name: str) -> Container:
-    try:
-        _stop_database_container(docker_client, container_name)
-    except docker.errors.NotFound:
-        pass
-
-    new_db_container = docker_client.containers.run(
-        image=TestConfig.PG_IMAGE,
-        name=container_name,
-        environment={
-            "POSTGRES_DB": TestConfig.PG_DB,
-            "POSTGRES_USER": TestConfig.PG_USER,
-            "POSTGRES_PASSWORD": TestConfig.PG_PASSWORD,
-            "POSTGRES_HOST": TestConfig.PG_HOST,
-            "POSTGRES_PORT": TestConfig.PG_PORT,
-        },
-        ports={5432: TestConfig.PG_PORT},
-        detach=True,
-    )
-    return new_db_container
-
-
 @pytest.fixture(scope="session")
-def fx_docker() -> DockerClient:
-    """Returns a client object for accessing docker.
-
-    :return: docker client object
-    """
-    print("\n-> fx_docker")
-    return docker.client.from_env()
-
-
-@pytest.fixture(scope="session")
-def fx_app(fx_docker) -> Generator[FlaskClient, None, None]:
+def fx_app() -> Generator[FlaskClient, None, None]:
     """Returns a flask object for accessing application.
 
     :return: flask test client object
     """
     print("\n-> fx_app")
 
-    _run_database_container(fx_docker, TestConfig.PG_CONTAINER_NAME)
+    # Run containers for tests.
+    subprocess.run(
+        ["make", f"--directory={BASE_DIR}/..", "test_containers_start"], stdout=subprocess.PIPE
+    ).stdout.decode()
 
     # Init app for testing.
     app = create_app(TestConfig)
@@ -75,7 +37,10 @@ def fx_app(fx_docker) -> Generator[FlaskClient, None, None]:
     # Stop app for testing.
     app_context.pop()
 
-    _stop_database_container(fx_docker, TestConfig.PG_CONTAINER_NAME)
+    # Stop containers for tests.
+    subprocess.run(
+        ["make", f"--directory={BASE_DIR}/..", "reset"], stdout=subprocess.PIPE
+    ).stdout.decode()
 
     print("-> Teardown fx_app.")
 

@@ -7,25 +7,26 @@ create_venv:
 
 reset:
 	# Reset all conteiners create in project.
-	docker-compose -f docker-compose.yml down --volumes --remove-orphans
+	docker-compose -f docker-compose.dev.yml down --volumes --remove-orphans
 	docker-compose -f docker-compose.stage.yml down --volumes --remove-orphans
 
-run_db: reset
+test_containers_start: reset
 	# Run container with database.
-	docker-compose -f docker-compose.yml up -d --build
+	docker-compose -f docker-compose.dev.yml up -d --build
 
-test:
+test: reset
 	# Run pytest.
 	./venv/bin/pytest --cov=nucleus tests/
 
 # Running.
-run: run_db
+run: test_containers_start
 	# Run application for development.
-	export PYTHONPATH=$$PYTHONPATH:nucleus; ./venv/bin/python nucleus/main.py
+	sh run_nucleus.sh dev.env
 
-run_test_instance: reset
+run_stage_instance: reset
 	# Run project in docker containers
-	docker-compose -f docker-compose.stage.yml up --build
+	docker build nucleus -t nucleus
+	docker-compose -f docker-compose.stage.yml up
 
 format:
 	# Run checking and formatting sources.
