@@ -23,3 +23,10 @@ class Base(db.Model):
     datetime_modified = db.Column(
         db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), comment="Date modified"
     )
+
+    def to_dict(self) -> dict:
+        return {key: getattr(self, key) for key in dir(self) if not key.startswith("_")}
+
+    def __repr__(self):
+        parameters = ", ".join([f"{key}={value}" for key, value in self.to_dict().items()])
+        return f"{self.__class__.__name__}({parameters})"

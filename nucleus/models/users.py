@@ -18,11 +18,11 @@ class Users(Base):
         self.password_hash = generate_password_hash(password)
 
     def to_dict(self) -> dict:
-        return {"id": self.id, "username": self.username}
+        return {"id": self.id, "username": self.username, "role": self.roles.name}
 
 
 class Roles(Base):
-    name = db.Column(db.String, nullable=False, comment="Username")
+    name = db.Column(db.String, nullable=False, unique=True, comment="Username")
     users = db.relationship("Users", backref="roles")
 
     @classmethod

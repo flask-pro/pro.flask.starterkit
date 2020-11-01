@@ -12,7 +12,7 @@ def test_users__crud(fx_app, fx_auth_admin) -> None:
     assert r_get.json["id"] == r_create.json["id"]
     assert r_get.json["username"] == r_create.json["username"]
 
-    updated_user = {"id": r_create.json["id"], "username": "updated_test_user"}
+    updated_user = {"id": r_create.json["id"], "username": "updated_test_user", "role": "user"}
     r_update = fx_app.put(
         f'/v1/users/{r_create.json["id"]}', headers=fx_auth_admin, json=updated_user
     )
@@ -31,7 +31,7 @@ def test_users__bad_id(fx_app, fx_auth_admin) -> None:
     r_get = fx_app.get("/v1/users/1234567890", headers=fx_auth_admin)
     assert r_get.status_code == 404
 
-    updated_user = {"id": 1234567890, "username": "updated_test_user"}
+    updated_user = {"id": 1234567890, "username": "updated_test_user", "role": "user"}
     r_update = fx_app.put("/v1/users/1234567890", headers=fx_auth_admin, json=updated_user)
     assert r_update.status_code == 404
 

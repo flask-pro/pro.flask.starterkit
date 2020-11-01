@@ -17,7 +17,7 @@ def test_auth__crud(fx_app) -> None:
     assert r_signup.status_code == 201
     assert "id" in r_signup.json
     assert r_signup.json["username"] == new_user["username"]
-    assert not r_signup.json.get("role")
+    assert r_signup.json["role"] == "user"
 
     # Login.
     r_login = fx_app.post("/v1/login", headers=headers)
@@ -32,7 +32,7 @@ def test_auth__crud(fx_app) -> None:
     assert r_profile.status_code == 200
     assert "id" in r_profile.json
     assert r_profile.json["username"] == new_user["username"]
-    assert not r_signup.json.get("role")
+    assert r_signup.json.get("role")
 
     # Renew.
     r_renew = fx_app.put(
@@ -88,3 +88,8 @@ def test_auth__double_signup(fx_app) -> None:
     # Signup second.
     r_signup = fx_app.post("/v1/signup", json=new_user)
     assert r_signup.status_code == 422
+
+
+def test_auth__non_auth(fx_app) -> None:
+    print("\n--> test_auth__non_auth")
+    assert fx_app.get("/v1/profile").status_code == 401

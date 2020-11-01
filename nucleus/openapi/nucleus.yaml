@@ -424,11 +424,15 @@ components:
       required:
         - id
         - username
+        - role
       additionalProperties: false
       properties:
         id:
           $ref: "#/components/schemas/ID"
         username:
+          type: string
+          example: "user"
+        role:
           type: string
           example: "user"
     UsersList:

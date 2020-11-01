@@ -29,7 +29,7 @@ class User:
         return users_list
 
     @classmethod
-    def create(cls, user: dict) -> dict:
+    def create(cls, user: dict) -> UsersModel:
         if not user.get("role"):
             role = RolesModel.query.filter_by(name="user").first()
             user = {**user, "role_id": role.id}
@@ -38,17 +38,17 @@ class User:
             del user["role"]
             user = {**user, "role_id": role.id}
 
-        return cls.TABLE_MODEL.create(user).to_dict()
+        return cls.TABLE_MODEL.create(user)
 
     @classmethod
-    def get(cls, id_: str) -> dict:
-        return cls.TABLE_MODEL.get(id_).to_dict()
+    def get(cls, id_: str) -> UsersModel:
+        return cls.TABLE_MODEL.get(id_)
 
     @classmethod
-    def update(cls, id_: str, user: dict) -> dict:
+    def update(cls, id_: str, user: dict) -> UsersModel:
         if id_ != user.get("id"):
             abort(400, "ID is required!")
-        return cls.TABLE_MODEL.update(id_, user).to_dict()
+        return cls.TABLE_MODEL.update(id_, user)
 
     @classmethod
     def delete(cls, id_: str) -> dict:
@@ -80,18 +80,18 @@ class Role:
         return roles_list
 
     @classmethod
-    def create(cls, role: dict) -> dict:
-        return cls.TABLE_MODEL.create(role).to_dict()
+    def create(cls, role: dict) -> RolesModel:
+        return cls.TABLE_MODEL.create(role)
 
     @classmethod
-    def get(cls, id_: str) -> dict:
-        return cls.TABLE_MODEL.get(id_).to_dict()
+    def get(cls, id_: str) -> RolesModel:
+        return cls.TABLE_MODEL.get(id_)
 
     @classmethod
-    def update(cls, id_: str, role: dict) -> dict:
+    def update(cls, id_: str, role: dict) -> RolesModel:
         if id_ != role.get("id"):
             abort(400, "ID is required!")
-        return cls.TABLE_MODEL.update(id_, role).to_dict()
+        return cls.TABLE_MODEL.update(id_, role)
 
     @classmethod
     def delete(cls, id_: str) -> dict:

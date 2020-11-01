@@ -5,6 +5,7 @@ from flask import current_app
 from jose import jwt
 from werkzeug.security import check_password_hash
 
+from nucleus.controllers.users import User
 from nucleus.models.users import Users
 
 
@@ -47,3 +48,7 @@ class Auth:
             return cls.get_token(user.id)
         else:
             abort(400, f"Password wrong! | username: <{username}>")
+
+    @classmethod
+    def signup(cls, user: dict) -> dict:
+        return User.create(user).to_dict()
