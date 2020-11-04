@@ -1,9 +1,10 @@
 from datetime import datetime
 
+from nucleus.common.search import FullTextSearchMixin
 from nucleus.models import db
 
 
-class Base(db.Model):
+class Base(FullTextSearchMixin, db.Model):
     """Base class for table.
 
     * **id** - Integer - unique identifier
@@ -16,6 +17,8 @@ class Base(db.Model):
     """
 
     __abstract__ = True
+
+    __searchable__ = ["description"]
 
     id = db.Column(db.Integer, primary_key=True, index=True, comment="ID")
     description = db.Column(db.Text, comment="Description")

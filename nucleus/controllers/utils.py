@@ -65,6 +65,7 @@ class ModelManager:
         return row
 
     def delete(self, id_: str) -> None:
-        deleted_row_id = self._model.query.filter_by(id=id_).delete()
+        row = self._model.query.filter_by(id=id_).one()
+        db.session.delete(row)
         db.session.commit()
-        return deleted_row_id
+        return row

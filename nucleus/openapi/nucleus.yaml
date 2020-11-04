@@ -12,6 +12,8 @@ tags:
     description: Manage users.
   - name: files
     description: Manage files.
+  - name: clients
+    description: Manage clients.
 paths:
   /signup:
     post:
@@ -334,6 +336,132 @@ paths:
               schema:
                 type: string
                 format: binary
+  /clients:
+    get:
+      tags:
+        - clients
+      operationId: nucleus.api.v1.clients.get_clients_list
+      summary: Returns a list of clients
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientsList"
+      security:
+        - jwt: []
+    post:
+      tags:
+        - clients
+      operationId: nucleus.api.v1.clients.create_client
+      summary: Create client
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientNew"
+        required: true
+      security:
+        - jwt: []
+  /clients/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - clients
+      operationId: nucleus.api.v1.clients.get_client
+      summary: Get client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+      security:
+        - jwt: []
+    put:
+      tags:
+        - clients
+      operationId: nucleus.api.v1.clients.update_client
+      summary: Update client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Client"
+      security:
+        - jwt: []
+    delete:
+      tags:
+        - clients
+      operationId: nucleus.api.v1.clients.delete_client
+      summary: Delete client
+      responses:
+        '204':
+          description: OK
+      security:
+        - jwt: []
+  /search:
+    get:
+      tags:
+        - search
+      operationId: nucleus.api.v1.search.get_search_list
+      summary: Returns search result
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/scope"
+        - $ref: "#/components/parameters/q"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchList"
+        '404':
+          description: Not Found
+      security:
+        - jwt: []
+  /search/reindex:
+    get:
+      tags:
+        - search
+      operationId: nucleus.api.v1.search.search_reindex
+      summary: Reindex search index
+      parameters:
+        - $ref: "#/components/parameters/scope"
+      responses:
+        '200':
+          description: OK
+          content:
+            "text/plain":
+              schema:
+                type: string
+                example: OK
+      security:
+        - jwt: []
 components:
   parameters:
     include_metadata:
@@ -361,14 +489,32 @@ components:
         minimum: 1
         maximum: 100
     id:
-      name: id
       in: path
+      name: id
       description: Object id.
       required: true
       schema:
         type: integer
         minimum: 1
         example: 1
+    scope:
+      in: query
+      name: scope
+      description: Search scope.
+      required: true
+      schema:
+        type: string
+        enum: [clients]
+    q:
+      in: query
+      name: q
+      description: Search query
+      required: true
+      schema:
+        type: string
+        example: "Search"
+        minLength: 3
+        maxLength: 50
   schemas:
     ID:
       type: integer
@@ -484,6 +630,62 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Role"
+    ClientNew:
+      type: object
+      required:
+        - name
+        - last_name
+        - mobile_phone
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "Jhon"
+        last_name:
+          type: string
+          example: "Doe"
+        mobile_phone:
+          type: string
+          pattern: '^7\d{10}$'
+          example: "71234567890"
+        description:
+          type: string
+          example: "Best client!"
+    Client:
+      type: object
+      required:
+        - id
+        - name
+        - last_name
+        - mobile_phone
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: "Jhon"
+        last_name:
+          type: string
+          example: "Doe"
+        mobile_phone:
+          type: string
+          pattern: '^7\d{10}$'
+          example: "71234567890"
+        description:
+          type: string
+          example: "Best client!"
+    ClientsList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Client"
     File:
       type: object
       required:
@@ -525,6 +727,24 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/File"
+    Search:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+    SearchList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: "#/components/schemas/Metadata"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Search"
     Pagination:
       type: object
       required:

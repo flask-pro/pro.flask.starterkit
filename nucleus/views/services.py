@@ -1,6 +1,7 @@
 from flask import Blueprint
 from flask import render_template
 
+from nucleus.common.search import elasticsearch
 from nucleus.models import db
 
 services = Blueprint("services", __name__)
@@ -14,6 +15,7 @@ def index() -> str:
 @services.route("/check", methods=["GET"])
 def check() -> str:
     db.engine.execute("SELECT version();")
+    elasticsearch.info()
     return "OK"
 
 

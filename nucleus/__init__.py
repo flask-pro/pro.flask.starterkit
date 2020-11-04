@@ -5,6 +5,8 @@ from logging.config import dictConfig
 from typing import Type
 
 import connexion
+from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import ConnectionError
 from sqlalchemy.exc import SQLAlchemyError
 
 from nucleus.common.errors import register_errors
@@ -40,6 +42,23 @@ def create_app(config_app: Type[Config]) -> connexion:
     # Registration handlers.
     register_errors(app)
 
+    # Wait run Elasticsearch.
+    with app.app_context():
+        elasticsearch = Elasticsearch([app.config["ELASTICSEARCH_URL"]])
+        for _ in range(15):
+            try:
+                elasticsearch.info()
+                break
+            except ConnectionError as err:
+                app.logger.warning(f"Elasticsearch not available: {err}!")
+                time.sleep(1)
+        try:
+            elasticsearch.info()
+            app.logger.info("Elasticsearch available!")
+        except ConnectionError as err:
+            app.logger.warning(f"Elasticsearch not available: {err}!")
+            sys.exit()
+
     # Create tables in database.
     with app.app_context():
         for _ in range(10):
@@ -49,7 +68,6 @@ def create_app(config_app: Type[Config]) -> connexion:
             except SQLAlchemyError as err:
                 app.logger.warning(f"Database not available: {err}!")
                 time.sleep(1)
-
         try:
             db.create_all()
             load_init_data()

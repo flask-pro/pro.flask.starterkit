@@ -7,9 +7,22 @@ services:
         ports:
             - "5432:5432"
         networks:
-            - dev_net
+            - db_net
         logging:
             driver: none
+    dev_es:
+        container_name: dev_es
+        image: "elasticsearch:7.9.3"
+        environment:
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+        networks:
+            - es_net
 networks:
-    dev_net:
+    db_net:
+        driver: bridge
+    es_net:
         driver: bridge

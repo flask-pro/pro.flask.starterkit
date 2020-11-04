@@ -50,3 +50,6 @@ class Config:
         "xls",
         "xlsx",
     }
+
+    # ElasticSearch.
+    ELASTICSEARCH_URL = os.environ["ELASTICSEARCH_URL"]

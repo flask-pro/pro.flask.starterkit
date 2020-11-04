@@ -93,3 +93,10 @@ def test_auth__double_signup(fx_app) -> None:
 def test_auth__non_auth(fx_app) -> None:
     print("\n--> test_auth__non_auth")
     assert fx_app.get("/v1/profile").status_code == 401
+
+
+def test_auth__bad_token(fx_app) -> None:
+    print("\n--> test_auth__bad_token")
+    assert (
+        fx_app.get("/v1/profile", headers={"Authorization": "Bearer BAD_TOKEN"}).status_code == 401
+    )

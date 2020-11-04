@@ -7,7 +7,19 @@ services:
             - "db_vol:/var/lib/postgresql/data"
         env_file: stage.env
         networks:
-            - stage_net
+            - db_net
+        logging:
+            driver: none
+    stage_es:
+        container_name: stage_es
+        image: "elasticsearch:7.9.3"
+        environment:
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+        volumes:
+            - "es_vol:/usr/share/elasticsearch/data"
+        networks:
+            - es_net
         logging:
             driver: none
     stage_app:
@@ -17,11 +29,16 @@ services:
         ports:
             - "127.0.0.1:8010:5000"
         networks:
-            - stage_net
+            - db_net
+            - es_net
         depends_on:
             - stage_db
+            - stage_es
 networks:
-    stage_net:
+    db_net:
+        driver: bridge
+    es_net:
         driver: bridge
 volumes:
     db_vol:
+    es_vol:

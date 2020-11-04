@@ -17,6 +17,8 @@ class TestConfig(Config):
     FILES_URL = "/v1/files"
     ROLES_URL = "/v1/roles"
     USERS_URL = "/v1/users"
+    CLIENTS_URL = "/v1/clients"
+    SEARCH_URL = "/v1/search"
 
     # Blueprints routes.
     MAIN_URL = "/"
