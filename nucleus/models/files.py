@@ -14,4 +14,5 @@ class Files(Base):
             "length": self.length,
             "mime_type": self.mime_type,
             "url": f"/v1/files/download/{self.id}",
+            "thumbnail": f"/v1/files/download/{self.id}/thumbnail/",
         }

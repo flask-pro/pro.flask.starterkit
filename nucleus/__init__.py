@@ -80,6 +80,7 @@ def create_app(config_app: Type[Config]) -> connexion:
     for _ in range(3):
         try:
             os.mkdir(app.config["FILES_BASE_DIR"])
+            os.mkdir(os.path.join(app.config["FILES_BASE_DIR"], "thumbnails"))
             app.logger.info("Folder for files created!")
             break
         except FileExistsError:

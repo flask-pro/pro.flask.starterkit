@@ -18,10 +18,6 @@ repos:
       - id: trailing-whitespace
       - id: check-yaml
       - id: check-builtin-literals
-  - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.17.0
-    hooks:
-      - id: yamllint
   - repo: https://gitlab.com/pycqa/flake8
     rev: ''  # pick a git hash / tag to point to
     hooks:

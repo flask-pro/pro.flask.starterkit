@@ -51,5 +51,9 @@ class Config:
         "xlsx",
     }
 
+    EXTENSIONS_FOR_THUMBNAILS = {"jpg", "jpeg", "png"}
+    DEFAULT_THUMBNAIL = os.path.join(BASE_DIR, "content", "floppy.jpg")
+    THUMBNAIL_SIZE_PX = 200, 200
+
     # ElasticSearch.
     ELASTICSEARCH_URL = os.environ["ELASTICSEARCH_URL"]

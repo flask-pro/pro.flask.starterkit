@@ -38,3 +38,18 @@ def download_file(id):
     )
     response.direct_passthrough = False
     return response
+
+
+def download_thumbnail(id):
+    file = File.get(id)
+    file_path = os.path.join(current_app.config["FILES_BASE_DIR"], "thumbnails", file["name"])
+
+    try:
+        response = send_file(file_path, attachment_filename=file["name"])
+    except FileNotFoundError:
+        response = send_file(
+            current_app.config["DEFAULT_THUMBNAIL"], attachment_filename="thumbnail.jpg"
+        )
+
+    response.direct_passthrough = False
+    return response

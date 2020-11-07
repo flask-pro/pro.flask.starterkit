@@ -336,6 +336,24 @@ paths:
               schema:
                 type: string
                 format: binary
+  /files/download/{id}/thumbnail/:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+          - files
+      summary: Download a thumbnail
+      operationId: nucleus.api.v1.files.download_thumbnail
+      security:
+        - jwt: []
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
   /clients:
     get:
       tags:
@@ -694,6 +712,7 @@ components:
         - length
         - mime_type
         - url
+        - thumbnail
       additionalProperties: false
       properties:
         id:
@@ -716,6 +735,10 @@ components:
           type: string
           example: 'https://example.com/v1/files/download/12345'
           description: "Link to download the file."
+        thumbnail:
+          type: string
+          example: 'https://example.com/v1/files/download/12345/thumbnail'
+          description: "Link to download the thumbnail."
     FilesList:
       type: object
       required:

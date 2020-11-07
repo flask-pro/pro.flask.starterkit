@@ -1,6 +1,9 @@
 import os
+from contextlib import suppress
 
 from flask import abort
+from flask import current_app
+from PIL import Image
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
@@ -9,10 +12,10 @@ from nucleus.controllers.utils import Items
 from nucleus.controllers.utils import ModelManager
 from nucleus.models.files import Files
 
-ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
 FILES_BASE_DIR = Config.FILES_BASE_DIR
-ITEMS_PER_PAGE = Config.ITEMS_PER_PAGE
-MAX_PER_PAGE = Config.MAX_PER_PAGE
+THUMBNAIL_SIZE_PX = Config.THUMBNAIL_SIZE_PX
+ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
+EXTENSIONS_FOR_THUMBNAILS = Config.EXTENSIONS_FOR_THUMBNAILS
 
 
 class File:
@@ -21,12 +24,14 @@ class File:
     TABLE_MODEL = ModelManager(Files)
 
     @staticmethod
-    def _allowed_file(filename: str) -> bool:
-        """Check file contains allowed extension."""
-        return all(["." in filename, filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS])
+    def _is_allow_extension(filename, extensions):
+        """Check file containse allowed extension."""
+        return "." in filename and filename.rsplit(".", 1)[1].lower() in extensions
 
     @staticmethod
     def file_list(parameters: dict) -> dict:
+        ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
+        MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 
         users_list = Items(model=Files, include_metadata=parameters.get("include_metadata", False))
         users_list.ITEMS_PER_PAGE = ITEMS_PER_PAGE
@@ -38,39 +43,55 @@ class File:
         return users_list
 
     @classmethod
+    def create_thumbnail(cls, file: FileStorage, parent_filename: str):
+        im = Image.open(file)
+        im.thumbnail(THUMBNAIL_SIZE_PX)
+        thumbnail_path = os.path.join(FILES_BASE_DIR, "thumbnails", str(parent_filename))
+        im.save(thumbnail_path, "png")
+
+    @classmethod
     def create(cls, file: FileStorage) -> dict:
         if not file:
             abort(422, "No file part")
 
         # if user does not select file, browser also submit an empty part without filename
-        if file.filename == "":
+        elif file.filename == "":
             abort(422, "No selected file")
 
-        if not cls._allowed_file(file.filename):
+        elif file and cls._is_allow_extension(file.filename, ALLOWED_EXTENSIONS):
+
+            filename = secure_filename(os.path.basename(file.filename))
+
+            new_file = {"name": filename, "mime_type": file.mimetype}
+
+            created_file = cls.TABLE_MODEL.create(new_file)
+            file.save(os.path.join(FILES_BASE_DIR, str(created_file.id)))
+
+            # Get file length.
+            file.seek(0, os.SEEK_END)
+            file_length = file.tell()
+
+            created_file = cls.TABLE_MODEL.patch(created_file.id, {"length": file_length}).to_dict()
+
+            if cls._is_allow_extension(file.filename, EXTENSIONS_FOR_THUMBNAILS):
+                cls.create_thumbnail(file, created_file["id"])
+
+            return created_file
+        else:
             abort(422, "File not allowed.")
-
-        filename = secure_filename(os.path.basename(file.filename))
-
-        new_file = {"name": filename, "mime_type": file.mimetype}
-
-        file_from_db = cls.TABLE_MODEL.create(new_file)
-
-        file.save(os.path.join(FILES_BASE_DIR, str(file_from_db.id)))
-
-        # Get file length.
-        file_length = os.path.getsize(os.path.join(FILES_BASE_DIR, str(file_from_db.id)))
-
-        return cls.TABLE_MODEL.patch(str(file_from_db.id), {"length": file_length}).to_dict()
 
     @classmethod
     def get(cls, id_: str) -> dict:
         return cls.TABLE_MODEL.get(id_).to_dict()
 
     @classmethod
-    def delete(cls, id_: str) -> [str, dict]:
+    def delete(cls, id_: str) -> dict:
         file = cls.TABLE_MODEL.get(id_)
+        file_path = os.path.join(FILES_BASE_DIR, str(file.id))
         if cls.TABLE_MODEL.delete(file.id):
-            os.remove(os.path.join(FILES_BASE_DIR, str(file.id)))
+            os.remove(file_path)
+            with suppress(FileNotFoundError):
+                os.remove(os.path.join(FILES_BASE_DIR, "thumbnails", str(file.id)))
             return ""
         else:
             abort(404, "Object not found!")
