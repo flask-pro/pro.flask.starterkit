@@ -1,4 +1,4 @@
-from nucleus.models import db
+from nucleus.common.extensions import db
 
 
 class Items:

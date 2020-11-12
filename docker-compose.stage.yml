@@ -31,13 +31,42 @@ services:
         networks:
             - db_net
             - es_net
+            - metrics_net
         depends_on:
             - stage_db
             - stage_es
+    stage_prometheus:
+        container_name: stage_prometheus
+        image: prom/prometheus:v2.22.1
+        volumes:
+            - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
+        ports:
+            - "127.0.0.1:9090:9090"
+        networks:
+            - metrics_net
+        depends_on:
+            - stage_es
+    stage_grafana:
+        container_name: stage_grafana
+        image: grafana/grafana:7.3.2
+        user: "1000"
+        volumes:
+            - ./grafana/config.ini:/etc/grafana/grafana.ini
+            - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/default.yaml
+            - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+            - ./grafana/dashboards:/var/lib/grafana/dashboards
+        ports:
+            - "127.0.0.1:3000:3000"
+        networks:
+            - metrics_net
+        depends_on:
+            - stage_prometheus
 networks:
     db_net:
         driver: bridge
     es_net:
+        driver: bridge
+    metrics_net:
         driver: bridge
 volumes:
     db_vol:

@@ -1,12 +1,12 @@
 from typing import Tuple
 
+from nucleus.common.extensions import db
 from elasticsearch import Elasticsearch
 from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.session import Session
 
 from nucleus.common.errors import NoResultSearch
 from nucleus.config import Config
-from nucleus.models import db
 
 elasticsearch = Elasticsearch([Config.ELASTICSEARCH_URL])
 

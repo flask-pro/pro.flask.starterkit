@@ -14,8 +14,8 @@ user_admin = {"username": "admin", "password": "secret", "role": "admin"}
 
 def load_init_data() -> bool:
     """Load initial data when the application starts."""
-    Roles.bulk_create(roles)
     try:
+        Roles.bulk_create(roles)
         User.create(user_admin)
     except IntegrityError as err:
         current_app.logger.info(f"Load init data | error load user | {repr(err)}")

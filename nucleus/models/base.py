@@ -1,7 +1,8 @@
 from datetime import datetime
 
+from nucleus.common.extensions import db
+
 from nucleus.common.search import FullTextSearchMixin
-from nucleus.models import db
 
 
 class Base(FullTextSearchMixin, db.Model):

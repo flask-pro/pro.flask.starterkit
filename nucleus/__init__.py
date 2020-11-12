@@ -5,15 +5,16 @@ from logging.config import dictConfig
 from typing import Type
 
 import connexion
+from nucleus.common.extensions import db
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError
 from sqlalchemy.exc import SQLAlchemyError
 
 from nucleus.common.errors import register_errors
+from nucleus.common.extensions import register_extensions
 from nucleus.common.load_data import load_init_data
 from nucleus.common.logging import logging_configuration
 from nucleus.config import Config
-from nucleus.models import db
 
 
 def create_app(config_app: Type[Config]) -> connexion:
@@ -24,7 +25,7 @@ def create_app(config_app: Type[Config]) -> connexion:
 
     # Init application.
     options = {"swagger_url": "/docs"}
-    app_conn = connexion.FlaskApp(__name__, specification_dir="openapi/", options=options)
+    app_conn = connexion.App(__name__, specification_dir="openapi/", options=options)
     app_conn.add_api("nucleus.yaml", base_path="/v1", validate_responses=True)
 
     # Flask app.
@@ -32,14 +33,14 @@ def create_app(config_app: Type[Config]) -> connexion:
     app.config.from_object(config_app)
 
     # Flask extensions.
-    db.init_app(app)
+    register_extensions(app)
 
     # Registration routes.
     from nucleus.views.services import services
 
     app.register_blueprint(services)
 
-    # Registration handlers.
+    # Registration error handlers.
     register_errors(app)
 
     # Wait run Elasticsearch.

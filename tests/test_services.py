@@ -20,3 +20,10 @@ def test_collapse(fx_app) -> None:
     print("\n--> test_collapse")
     r = fx_app.get(f"{MAIN_URL}collapse")
     assert r.status_code == 500
+
+
+def test_metrics(fx_app) -> None:
+    print("\n--> test_metrics")
+    r = fx_app.get(f"{MAIN_URL}metrics")
+    assert r.status_code == 200
+    assert "python_gc_objects_collected_total" in r.data.decode()

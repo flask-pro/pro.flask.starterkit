@@ -1,8 +1,8 @@
+from nucleus.common.extensions import db
 from flask import Blueprint
 from flask import render_template
 
 from nucleus.common.search import elasticsearch
-from nucleus.models import db
 
 services = Blueprint("services", __name__)
 

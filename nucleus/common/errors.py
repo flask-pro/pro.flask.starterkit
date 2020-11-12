@@ -1,14 +1,13 @@
 from typing import Any
 from typing import Tuple
 
+from nucleus.common.extensions import db
 from flask import current_app
 from flask import Flask
 from flask import request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
-
-from nucleus.models import db
 
 
 def error_msg(exc: Any, exc_info: bool = False) -> None:
