@@ -1,6 +1,6 @@
-from nucleus.common.extensions import db
 from werkzeug.security import generate_password_hash
 
+from nucleus.common.extensions import db
 from nucleus.models.base import Base
 
 

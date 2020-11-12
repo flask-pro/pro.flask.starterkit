@@ -1,5 +1,4 @@
 from nucleus.common.extensions import db
-
 from nucleus.models.base import Base
 
 

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from nucleus.common.extensions import db
-
 from nucleus.common.search import FullTextSearchMixin
 
 

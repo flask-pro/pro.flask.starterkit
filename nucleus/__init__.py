@@ -5,12 +5,12 @@ from logging.config import dictConfig
 from typing import Type
 
 import connexion
-from nucleus.common.extensions import db
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError
 from sqlalchemy.exc import SQLAlchemyError
 
 from nucleus.common.errors import register_errors
+from nucleus.common.extensions import db
 from nucleus.common.extensions import register_extensions
 from nucleus.common.load_data import load_init_data
 from nucleus.common.logging import logging_configuration
