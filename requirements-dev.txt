@@ -3,6 +3,7 @@ elasticsearch==7.10.0
 Flask==1.1.2
 Flask-SQLAlchemy==2.4.4
 pre-commit==2.8.2
+prometheus-flask-exporter==0.18.1
 psycopg2-binary==2.8.6
 pytest==6.1.2
 pytest-cov==2.10.1
