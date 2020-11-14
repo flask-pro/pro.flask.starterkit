@@ -55,5 +55,8 @@ class Config:
     DEFAULT_THUMBNAIL = os.path.join(BASE_DIR, "content", "floppy.jpg")
     THUMBNAIL_SIZE_PX = 200, 200
 
-    # ElasticSearch.
     ELASTICSEARCH_URL = os.environ["ELASTICSEARCH_URL"]
+
+    TELEGRAM_API_URL = os.getenv("TELEGRAM_API_URL")
+    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")

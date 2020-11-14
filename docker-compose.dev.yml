@@ -21,6 +21,8 @@ services:
             - "9300:9300"
         networks:
             - es_net
+        logging:
+            driver: none
 networks:
     db_net:
         driver: bridge
