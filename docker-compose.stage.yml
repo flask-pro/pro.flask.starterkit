@@ -5,7 +5,7 @@ services:
         image: "postgres:12-alpine"
         volumes:
             - "db_vol:/var/lib/postgresql/data"
-        env_file: stage.env
+        env_file: .env
         networks:
             - db_net
         logging:
@@ -25,7 +25,7 @@ services:
     stage_app:
         container_name: stage_app
         image: "nucleus:latest"
-        env_file: stage.env
+        env_file: .env
         ports:
             - "127.0.0.1:8010:5000"
         networks:
@@ -46,6 +46,9 @@ services:
             - metrics_net
         depends_on:
             - stage_es
+            - stage_app
+        logging:
+            driver: none
     stage_grafana:
         container_name: stage_grafana
         image: grafana/grafana:7.3.2
@@ -60,7 +63,10 @@ services:
         networks:
             - metrics_net
         depends_on:
+            - stage_app
             - stage_prometheus
+        logging:
+            driver: none
 networks:
     db_net:
         driver: bridge

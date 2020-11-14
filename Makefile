@@ -7,6 +7,7 @@ create_venv:
 
 reset:
 	# Reset all conteiners create in project.
+	echo "" > .env
 	docker-compose -f docker-compose.dev.yml down --volumes --remove-orphans
 	docker-compose -f docker-compose.stage.yml down --volumes --remove-orphans
 
@@ -26,7 +27,12 @@ run: test_containers_start
 run_stage_instance: reset
 	# Run project in docker containers
 	docker build nucleus -t nucleus
+	cp stage.env .env
+	unzip -p stage.env.zip >> .env
 	docker-compose -f docker-compose.stage.yml up
+
+log_stage_instance:
+	docker logs stage_app
 
 format:
 	# Run checking and formatting sources.
