@@ -20,6 +20,7 @@ class TestConfig(Config):
     CLIENTS_URL = "/v1/clients"
     SEARCH_URL = "/v1/search"
     PROFILES_URL = "/v1/profiles"
+    ACCOUNTS_URL = "/v1/accounts"
 
     # Blueprints routes.
     MAIN_URL = "/"

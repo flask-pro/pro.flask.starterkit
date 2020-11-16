@@ -40,10 +40,5 @@ def login(user) -> Tuple[dict, int]:
 
 
 @role_admin_or_user_required
-def profile(token_info) -> dict:
-    return User.get(token_info["sub"]).to_dict()
-
-
-@role_admin_or_user_required
 def renew(token_info) -> Tuple[dict, int]:
     return Auth.get_token(token_info["sub"]), 201

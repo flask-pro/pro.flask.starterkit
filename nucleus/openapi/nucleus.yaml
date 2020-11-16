@@ -8,6 +8,8 @@ servers:
 tags:
   - name: auth
     description: Autorization and autentication.
+  - name: accounts
+    description: Manage user account.
   - name: users
     description: Manage users.
   - name: profiles
@@ -16,6 +18,8 @@ tags:
     description: Manage files.
   - name: clients
     description: Manage clients.
+  - name: search
+    description: Manage search.
 paths:
   /signup:
     post:
@@ -50,21 +54,6 @@ paths:
                 $ref: "#/components/schemas/Token"
       security:
         - basic: []
-  /profile:
-    get:
-      tags:
-        - auth
-      summary: Return user profile
-      operationId: nucleus.api.v1.auth.profile
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-      security:
-        - jwt: []
   /renew:
     put:
       tags:
@@ -78,6 +67,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Token"
+      security:
+        - jwt: []
+  /accounts/profile:
+    get:
+      tags:
+        - accounts
+      summary: Return user profile
+      operationId: nucleus.api.v1.accounts.get_profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
       security:
         - jwt: []
   /users:
@@ -428,7 +432,7 @@ paths:
       - $ref: "#/components/parameters/id"
     get:
       tags:
-          - files
+        - files
       summary: Download a thumbnail
       operationId: nucleus.api.v1.files.download_thumbnail
       security:

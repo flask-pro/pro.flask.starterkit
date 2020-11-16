@@ -2,6 +2,10 @@ import base64
 
 import pytest
 
+from tests.config import TestConfig
+
+ACCOUNTS_URL = TestConfig.ACCOUNTS_URL
+
 
 def test_auth__crud(fx_app) -> None:
     print("\n--> test_auth__crud")
@@ -25,15 +29,6 @@ def test_auth__crud(fx_app) -> None:
     assert r_login.status_code == 201
     assert r_login.json["access_token"]
     assert r_login.json["refresh_token"]
-
-    # Get profile.
-    r_profile = fx_app.get(
-        "/v1/profile", headers={"Authorization": f'Bearer {r_login.json["access_token"]}'}
-    )
-    assert r_profile.status_code == 200
-    assert "id" in r_profile.json
-    assert r_profile.json["username"] == new_user["username"]
-    assert r_signup.json.get("role")
 
     # Renew.
     r_renew = fx_app.put(
@@ -93,11 +88,14 @@ def test_auth__double_signup(fx_app) -> None:
 
 def test_auth__non_auth(fx_app) -> None:
     print("\n--> test_auth__non_auth")
-    assert fx_app.get("/v1/profile").status_code == 401
+    assert fx_app.get(f"{ACCOUNTS_URL}/profile").status_code == 401
 
 
 def test_auth__bad_token(fx_app) -> None:
     print("\n--> test_auth__bad_token")
     assert (
-        fx_app.get("/v1/profile", headers={"Authorization": "Bearer BAD_TOKEN"}).status_code == 401
+        fx_app.get(
+            f"{ACCOUNTS_URL}/profile", headers={"Authorization": "Bearer BAD_TOKEN"}
+        ).status_code
+        == 401
     )
