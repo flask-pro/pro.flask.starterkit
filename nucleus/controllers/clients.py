@@ -12,7 +12,7 @@ class Client:
     TABLE_MODEL = ModelManager(ClientsModel)
 
     @staticmethod
-    def clients_list(parameters: dict) -> dict:
+    def get_clients_list(parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
         MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 

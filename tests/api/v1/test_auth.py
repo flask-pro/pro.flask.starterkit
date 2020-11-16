@@ -18,6 +18,7 @@ def test_auth__crud(fx_app) -> None:
     assert "id" in r_signup.json
     assert r_signup.json["username"] == new_user["username"]
     assert r_signup.json["role"] == "user"
+    assert r_signup.json["profile_id"]
 
     # Login.
     r_login = fx_app.post("/v1/login", headers=headers)

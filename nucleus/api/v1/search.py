@@ -7,7 +7,7 @@ from nucleus.controllers.search import Search
 
 @role_admin_or_user_required
 def get_search_list() -> dict:
-    return Search.list(connexion.request.args)
+    return Search.results_list(connexion.request.args)
 
 
 @role_admin_required

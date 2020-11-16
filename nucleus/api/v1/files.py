@@ -10,8 +10,8 @@ from nucleus.controllers.files import File
 
 
 @role_admin_required
-def file_list():
-    return File.file_list(connexion.request.args)
+def get_files_list():
+    return File.get_files_list(connexion.request.args)
 
 
 @role_admin_required

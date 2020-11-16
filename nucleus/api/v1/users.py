@@ -10,7 +10,7 @@ from nucleus.controllers.users import User
 
 @role_admin_required
 def get_users_list() -> dict:
-    return User.users_list(connexion.request.args)
+    return User.get_users_list(connexion.request.args)
 
 
 @role_admin_required

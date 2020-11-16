@@ -8,7 +8,7 @@ class Files(Base):
     mime_type = db.Column(db.String, nullable=False, comment="File MIME type.")
 
     def to_dict(self) -> dict:
-        return {
+        file = {
             "id": self.id,
             "name": self.name,
             "length": self.length,
@@ -16,3 +16,4 @@ class Files(Base):
             "url": f"/v1/files/download/{self.id}",
             "thumbnail": f"/v1/files/download/{self.id}/thumbnail/",
         }
+        return self.non_empty_parameters_to_dict(file)

@@ -10,10 +10,11 @@ class Clients(Base):
     mobile_phone = db.Column(db.String, nullable=False, unique=True, comment="Mobile phone")
 
     def to_dict(self) -> dict:
-        return {
+        client = {
             "id": self.id,
             "name": self.name,
             "last_name": self.last_name,
             "mobile_phone": self.mobile_phone,
             "description": self.description,
         }
+        return self.non_empty_parameters_to_dict(client)

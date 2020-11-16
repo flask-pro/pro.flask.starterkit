@@ -27,6 +27,7 @@ ENTRYPOINT ["uwsgi", \
             "--wsgi-file", "main.py", \
             "--callable", "app", \
             "--processes", "4", \
+            "--threads", "2", \
             "--master", \
             "--vacuum", \
             "--need-app"]

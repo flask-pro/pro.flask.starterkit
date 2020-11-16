@@ -10,6 +10,8 @@ tags:
     description: Autorization and autentication.
   - name: users
     description: Manage users.
+  - name: profiles
+    description: Manage profiles.
   - name: files
     description: Manage files.
   - name: clients
@@ -248,12 +250,97 @@ paths:
           description: OK
       security:
         - jwt: []
+  /profiles:
+    get:
+      tags:
+        - profiles
+      operationId: nucleus.api.v1.profiles.get_profiles_list
+      summary: Returns a list of profiles
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilesList"
+      security:
+        - jwt: []
+    post:
+      tags:
+        - profiles
+      operationId: nucleus.api.v1.profiles.create_profile
+      summary: Create profile
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileNew"
+        required: true
+      security:
+        - jwt: []
+  /profiles/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - profiles
+      operationId: nucleus.api.v1.profiles.get_profile
+      summary: Get profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+      security:
+        - jwt: []
+    put:
+      tags:
+        - profiles
+      operationId: nucleus.api.v1.profiles.update_profile
+      summary: Update profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"
+      security:
+        - jwt: []
+    delete:
+      tags:
+        - profiles
+      operationId: nucleus.api.v1.profiles.delete_profile
+      summary: Delete profile
+      responses:
+        '204':
+          description: OK
+      security:
+        - jwt: []
   /files:
     get:
       tags:
         - files
       summary: Returns a list of files
-      operationId: nucleus.api.v1.files.file_list
+      operationId: nucleus.api.v1.files.get_files_list
       security:
         - jwt: []
       parameters:
@@ -599,6 +686,8 @@ components:
         role:
           type: string
           example: "user"
+        profile_id:
+          $ref: "#/components/schemas/ID"
     UsersList:
       type: object
       required:
@@ -648,6 +737,54 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Role"
+    ProfileNew:
+      type: object
+      required:
+        - name
+        - lastname
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "user"
+        lastname:
+          type: string
+          example: "user"
+        description:
+          type: string
+          example: "user"
+    Profile:
+      type: object
+      required:
+        - id
+        - name
+        - lastname
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: "user"
+        lastname:
+          type: string
+          example: "user"
+        description:
+          type: string
+          example: "user"
+        user_id:
+          $ref: "#/components/schemas/ID"
+    ProfilesList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Profile"
     ClientNew:
       type: object
       required:

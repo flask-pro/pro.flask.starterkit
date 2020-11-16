@@ -29,7 +29,7 @@ class File:
         return "." in filename and filename.rsplit(".", 1)[1].lower() in extensions
 
     @staticmethod
-    def file_list(parameters: dict) -> dict:
+    def get_files_list(parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
         MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 

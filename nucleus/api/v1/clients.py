@@ -8,7 +8,7 @@ from nucleus.controllers.clients import Client
 
 @role_admin_required
 def get_clients_list() -> dict:
-    return Client.clients_list(connexion.request.args)
+    return Client.get_clients_list(connexion.request.args)
 
 
 @role_admin_required

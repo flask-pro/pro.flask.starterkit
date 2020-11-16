@@ -1,6 +1,7 @@
 from flask import abort
 from flask import current_app
 
+from nucleus.controllers.profiles import Profile
 from nucleus.controllers.utils import Items
 from nucleus.controllers.utils import ModelManager
 from nucleus.models.users import Roles as RolesModel
@@ -13,7 +14,7 @@ class User:
     TABLE_MODEL = ModelManager(UsersModel)
 
     @staticmethod
-    def users_list(parameters: dict) -> dict:
+    def get_users_list(parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
         MAX_PER_PAGE = current_app.config["MAX_PER_PAGE"]
 
@@ -29,16 +30,20 @@ class User:
         return users_list
 
     @classmethod
-    def create(cls, user: dict) -> UsersModel:
-        if not user.get("role"):
+    def create(cls, new_user: dict) -> UsersModel:
+        if not new_user.get("role"):
             role = RolesModel.query.filter_by(name="user").first()
-            user = {**user, "role_id": role.id}
+            new_user = {**new_user, "role_id": role.id}
         else:
-            role = RolesModel.query.filter_by(name=user["role"]).first()
-            del user["role"]
-            user = {**user, "role_id": role.id}
+            role = RolesModel.query.filter_by(name=new_user["role"]).first()
+            del new_user["role"]
+            new_user = {**new_user, "role_id": role.id}
 
-        return cls.TABLE_MODEL.create(user)
+        new_user_from_db = cls.TABLE_MODEL.create(new_user)
+
+        Profile.create({"name": "user", "lastname": "user", "user_id": new_user_from_db.id})
+
+        return cls.TABLE_MODEL.get(new_user_from_db.id)
 
     @classmethod
     def get(cls, id_: str) -> UsersModel:

@@ -5,12 +5,12 @@ from nucleus.models.clients import Clients as ClientsModel
 
 
 class Search:
-    """Management of the client."""
+    """Management of the search."""
 
     MODELS_MAP = {"clients": ClientsModel}
 
     @classmethod
-    def list(cls, parameters: dict) -> dict:
+    def results_list(cls, parameters: dict) -> dict:
         ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
 
         model = cls.MODELS_MAP.get(parameters["scope"])

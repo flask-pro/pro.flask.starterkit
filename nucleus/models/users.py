@@ -9,6 +9,8 @@ class Users(Base):
     password_hash = db.Column(db.String, nullable=False, comment="Password")
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
 
+    profiles = db.relationship("Profiles", backref="users", uselist=False)
+
     @property
     def password(self) -> None:
         raise AttributeError("Password is not a readable attribute.")
@@ -18,7 +20,13 @@ class Users(Base):
         self.password_hash = generate_password_hash(password)
 
     def to_dict(self) -> dict:
-        return {"id": self.id, "username": self.username, "role": self.roles.name}
+        user = {
+            "id": self.id,
+            "username": self.username,
+            "role": self.roles.name,
+            "profile_id": self.profiles.id,
+        }
+        return self.non_empty_parameters_to_dict(user)
 
 
 class Roles(Base):
@@ -33,7 +41,8 @@ class Roles(Base):
             role_objects.append(new_role)
         db.session.add_all(role_objects)
         db.session.commit()
-        return [_.to_dict() for _ in role_objects]
+        return [role.to_dict() for role in role_objects]
 
     def to_dict(self) -> dict:
-        return {"id": self.id, "name": self.name, "description": self.description}
+        role = {"id": self.id, "name": self.name, "description": self.description}
+        return self.non_empty_parameters_to_dict(role)

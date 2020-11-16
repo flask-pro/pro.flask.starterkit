@@ -6,12 +6,13 @@ USERS_URL = TestConfig.USERS_URL
 FILES_URL = TestConfig.FILES_URL
 ROLES_URL = TestConfig.ROLES_URL
 CLIENTS_URL = TestConfig.CLIENTS_URL
+PROFILES_URL = TestConfig.PROFILES_URL
 
 
 @pytest.mark.parametrize("page", [1, None])
 @pytest.mark.parametrize("per_page", [1, None])
 @pytest.mark.parametrize("include_metadata", [True, None])
-@pytest.mark.parametrize("endpoint", [CLIENTS_URL, FILES_URL, ROLES_URL, USERS_URL])
+@pytest.mark.parametrize("endpoint", [CLIENTS_URL, FILES_URL, PROFILES_URL, ROLES_URL, USERS_URL])
 def test_endpoints__list(
     fx_app,
     fx_auth_admin,
@@ -43,7 +44,7 @@ def test_endpoints__list(
 @pytest.mark.parametrize("page", ["BAD_VALUE", None])
 @pytest.mark.parametrize("per_page", ["BAD_VALUE", None])
 @pytest.mark.parametrize("include_metadata", ["BAD_VALUE", None])
-@pytest.mark.parametrize("endpoint", [CLIENTS_URL, FILES_URL, ROLES_URL, USERS_URL])
+@pytest.mark.parametrize("endpoint", [CLIENTS_URL, FILES_URL, PROFILES_URL, ROLES_URL, USERS_URL])
 def test_endpoints__list__error_400(
     fx_app, fx_auth_admin, page: str, per_page: str, include_metadata: str, endpoint: str
 ) -> None:

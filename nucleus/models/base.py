@@ -19,6 +19,8 @@ class Base(FullTextSearchMixin, db.Model):
     __abstract__ = True
 
     __searchable__ = ["description"]
+    __filterable__ = ["id"]
+    __sortable__ = ["datetime_created"]
 
     id = db.Column(db.Integer, primary_key=True, index=True, comment="ID")
     description = db.Column(db.Text, comment="Description")
@@ -27,8 +29,9 @@ class Base(FullTextSearchMixin, db.Model):
         db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), comment="Date modified"
     )
 
-    def to_dict(self) -> dict:
-        return {key: getattr(self, key) for key in dir(self) if not key.startswith("_")}
+    @classmethod
+    def non_empty_parameters_to_dict(cls, parameters: dict) -> dict:
+        return {key: value for key, value in parameters.items() if value}
 
     def __repr__(self):
         parameters = ", ".join([f"{key}={value}" for key, value in self.to_dict().items()])
