@@ -1,7 +1,12 @@
+import uuid
 from datetime import datetime
 
 from nucleus.common.extensions import db
 from nucleus.common.search import FullTextSearchMixin
+
+
+def make_uuid4() -> str:
+    return str(uuid.uuid4())
 
 
 class Base(FullTextSearchMixin, db.Model):
@@ -22,7 +27,7 @@ class Base(FullTextSearchMixin, db.Model):
     __filterable__ = ["id"]
     __sortable__ = ["datetime_created"]
 
-    id = db.Column(db.Integer, primary_key=True, index=True, comment="ID")
+    id = db.Column(db.String, primary_key=True, index=True, default=make_uuid4, comment="ID")
     description = db.Column(db.Text, comment="Description")
     datetime_created = db.Column(db.DateTime, default=datetime.utcnow(), comment="Date create")
     datetime_modified = db.Column(

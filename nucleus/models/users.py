@@ -7,7 +7,7 @@ from nucleus.models.base import Base
 class Users(Base):
     username = db.Column(db.String, nullable=False, unique=True, comment="Username")
     password_hash = db.Column(db.String, nullable=False, comment="Password")
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
+    role_id = db.Column(db.String, db.ForeignKey("roles.id"), nullable=False)
 
     profiles = db.relationship("Profiles", backref="users", uselist=False)
 

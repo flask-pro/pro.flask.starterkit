@@ -33,7 +33,7 @@ def delete_file(id):
 def download_file(id):
     file = File.get(id)
     response = send_file(
-        os.path.join(current_app.config["FILES_BASE_DIR"], str(file["id"])),
+        os.path.join(current_app.config["FILES_BASE_DIR"], file["id"]),
         attachment_filename=file["name"],
     )
     response.direct_passthrough = False

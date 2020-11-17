@@ -598,14 +598,14 @@ components:
         minimum: 1
         maximum: 100
     id:
-      in: path
       name: id
-      description: Object id.
+      in: path
+      description: id объекта.
       required: true
       schema:
-        type: integer
-        minimum: 1
-        example: 1
+        type: string
+        format: uuid
+        example: 789d995f-3aa0-4bf8-a37b-2f2f2086d503
     scope:
       in: query
       name: scope
@@ -626,11 +626,9 @@ components:
         maxLength: 50
   schemas:
     ID:
-      type: integer
-      minimum: 1
-      maximum: 10000000000
-      example: 1
-      description: "ID object in system."
+      type: string
+      example: 789d995f-3aa0-4bf8-a77b-2f2f20868503
+      description: UUID
     Token:
       type: object
       required:

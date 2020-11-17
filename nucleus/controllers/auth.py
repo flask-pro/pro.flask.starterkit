@@ -15,13 +15,13 @@ class Auth:
         return int(time.time())
 
     @staticmethod
-    def generate_auth_token(id_: int, expiries_in: int) -> str:
+    def generate_auth_token(id_: str, expiries_in: int) -> str:
         timestamp = Auth._current_timestamp()
         payload = {
             "iss": current_app.config["JWT_ISSUER"],
             "iat": int(timestamp),
             "exp": int(timestamp + expiries_in),
-            "sub": str(id_),
+            "sub": id_,
         }
 
         return jwt.encode(
@@ -29,7 +29,7 @@ class Auth:
         )
 
     @classmethod
-    def get_token(cls, id_: int) -> dict:
+    def get_token(cls, id_: str) -> dict:
         access_token = cls.generate_auth_token(id_, current_app.config["JWT_ACCESS_TOKEN_LIFETIME"])
         refresh_token = cls.generate_auth_token(
             id_, current_app.config["JWT_REFRESH_TOKEN_LIFETIME"]

@@ -46,7 +46,7 @@ class File:
     def create_thumbnail(cls, file: FileStorage, parent_filename: str):
         im = Image.open(file)
         im.thumbnail(THUMBNAIL_SIZE_PX)
-        thumbnail_path = os.path.join(FILES_BASE_DIR, "thumbnails", str(parent_filename))
+        thumbnail_path = os.path.join(FILES_BASE_DIR, "thumbnails", parent_filename)
         im.save(thumbnail_path, "png")
 
     @classmethod
@@ -65,7 +65,7 @@ class File:
             new_file = {"name": filename, "mime_type": file.mimetype}
 
             created_file = cls.TABLE_MODEL.create(new_file)
-            file.save(os.path.join(FILES_BASE_DIR, str(created_file.id)))
+            file.save(os.path.join(FILES_BASE_DIR, created_file.id))
 
             # Get file length.
             file.seek(0, os.SEEK_END)
@@ -87,11 +87,11 @@ class File:
     @classmethod
     def delete(cls, id_: str) -> dict:
         file = cls.TABLE_MODEL.get(id_)
-        file_path = os.path.join(FILES_BASE_DIR, str(file.id))
+        file_path = os.path.join(FILES_BASE_DIR, file.id)
         if cls.TABLE_MODEL.delete(file.id):
             os.remove(file_path)
             with suppress(FileNotFoundError):
-                os.remove(os.path.join(FILES_BASE_DIR, "thumbnails", str(file.id)))
+                os.remove(os.path.join(FILES_BASE_DIR, "thumbnails", file.id))
             return ""
         else:
             abort(404, "Object not found!")

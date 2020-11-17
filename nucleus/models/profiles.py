@@ -8,7 +8,7 @@ class Profiles(Base):
 
     name = db.Column(db.String, comment="Name")
     lastname = db.Column(db.String, comment="Lastname")
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=True)
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), unique=True, nullable=True)
 
     def to_dict(self) -> dict:
         profile = {

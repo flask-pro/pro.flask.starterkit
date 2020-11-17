@@ -1,3 +1,5 @@
+import uuid
+
 from tests.config import TestConfig
 
 USERS_URL = TestConfig.USERS_URL
@@ -33,15 +35,16 @@ def test_users__crud(fx_app, fx_auth_admin) -> None:
 
 def test_users__bad_id(fx_app, fx_auth_admin) -> None:
     print("\n--> test_users__bad_id")
+    bad_uuid = str(uuid.uuid4())
 
-    r_get = fx_app.get(f"{USERS_URL}/1234567890", headers=fx_auth_admin)
+    r_get = fx_app.get(f"{USERS_URL}/{bad_uuid}", headers=fx_auth_admin)
     assert r_get.status_code == 404
 
-    updated_user = {"id": 1234567890, "username": "updated_test_user", "role": "user"}
-    r_update = fx_app.put(f"{USERS_URL}/1234567890", headers=fx_auth_admin, json=updated_user)
+    updated_user = {"id": bad_uuid, "username": "updated_test_user", "role": "user"}
+    r_update = fx_app.put(f"{USERS_URL}/{bad_uuid}", headers=fx_auth_admin, json=updated_user)
     assert r_update.status_code == 404
 
-    r_delete = fx_app.delete(f"{USERS_URL}/1234567890", headers=fx_auth_admin)
+    r_delete = fx_app.delete(f"{USERS_URL}/{bad_uuid}", headers=fx_auth_admin)
     assert r_delete.status_code == 404
 
 

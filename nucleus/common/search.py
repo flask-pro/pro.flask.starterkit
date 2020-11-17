@@ -38,7 +38,7 @@ class SearchEngineMixin:
         if search["hits"]["total"]["value"] == 0:
             raise NoResultSearch(f"Result query <{query}> for index <{index}> empty.")
 
-        ids = [int(hit["_id"]) for hit in search["hits"]["hits"]]
+        ids = [hit["_id"] for hit in search["hits"]["hits"]]
         return ids, search["hits"]["total"]
 
 
