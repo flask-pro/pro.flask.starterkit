@@ -9,6 +9,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError
 from sqlalchemy.exc import SQLAlchemyError
 
+from nucleus.common.contexts import register_context_handlers
 from nucleus.common.errors import register_errors
 from nucleus.common.extensions import db
 from nucleus.common.extensions import register_extensions
@@ -42,6 +43,9 @@ def create_app(config_app: Type[Config]) -> connexion:
 
     # Registration error handlers.
     register_errors(app)
+
+    # Registration context handlers
+    register_context_handlers(app)
 
     # Wait run Elasticsearch.
     with app.app_context():

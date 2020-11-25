@@ -12,14 +12,16 @@ tags:
     description: Manage user account.
   - name: users
     description: Manage users.
+  - name: directories
+    description: Manage global directories.
   - name: profiles
     description: Manage profiles.
   - name: files
     description: Manage files.
-  - name: clients
-    description: Manage clients.
   - name: search
     description: Manage search.
+  - name: articles
+    description: Manage articles.
 paths:
   /signup:
     post:
@@ -445,91 +447,6 @@ paths:
               schema:
                 type: string
                 format: binary
-  /clients:
-    get:
-      tags:
-        - clients
-      operationId: nucleus.api.v1.clients.get_clients_list
-      summary: Returns a list of clients
-      parameters:
-        - $ref: "#/components/parameters/include_metadata"
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/per_page"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ClientsList"
-      security:
-        - jwt: []
-    post:
-      tags:
-        - clients
-      operationId: nucleus.api.v1.clients.create_client
-      summary: Create client
-      responses:
-        "201":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Client"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ClientNew"
-        required: true
-      security:
-        - jwt: []
-  /clients/{id}:
-    parameters:
-      - $ref: "#/components/parameters/id"
-    get:
-      tags:
-        - clients
-      operationId: nucleus.api.v1.clients.get_client
-      summary: Get client
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Client"
-      security:
-        - jwt: []
-    put:
-      tags:
-        - clients
-      operationId: nucleus.api.v1.clients.update_client
-      summary: Update client
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Client"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Client"
-      security:
-        - jwt: []
-    delete:
-      tags:
-        - clients
-      operationId: nucleus.api.v1.clients.delete_client
-      summary: Delete client
-      responses:
-        '204':
-          description: OK
-      security:
-        - jwt: []
   /search:
     get:
       tags:
@@ -571,6 +488,106 @@ paths:
                 example: OK
       security:
         - jwt: []
+  /articles:
+    get:
+      tags:
+        - articles
+      operationId: nucleus.api.v1.articles.get_articles_list
+      summary: Return global article list
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticlesList"
+    post:
+      tags:
+        - articles
+      operationId: nucleus.api.v1.articles.create_article
+      summary: Create article
+      description: |
+        Изображения предварительно загружаются через метод `POST /files`,
+        полученные `id` файлов, используется здесь.
+
+        При установке параметра `global_name` статья помещается в глобальный
+        справочник `GET /directories`.
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleNew"
+        required: true
+      security:
+        - jwt: []
+  /articles/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - articles
+      operationId: nucleus.api.v1.articles.get_article
+      summary: Get article
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+    put:
+      tags:
+        - articles
+      operationId: nucleus.api.v1.articles.update_article
+      summary: Update article
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleUpdate"
+      security:
+        - jwt: []
+    delete:
+      tags:
+        - articles
+      operationId: nucleus.api.v1.articles.delete_article
+      summary: Delete article
+      responses:
+        '204':
+          description: OK
+      security:
+        - jwt: []
+  /directories:
+    get:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.get_directories
+      summary: Return global directory.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Directories"
 components:
   parameters:
     include_metadata:
@@ -578,8 +595,9 @@ components:
       name: include_metadata
       description: Include metadata object to response
       schema:
-        type: boolean
-        example: true
+        type: string
+        enum:
+          - enable
     page:
       in: query
       name: page
@@ -613,7 +631,7 @@ components:
       required: true
       schema:
         type: string
-        enum: [clients]
+        enum: [articles]
     q:
       in: query
       name: q
@@ -622,13 +640,24 @@ components:
       schema:
         type: string
         example: "Search"
-        minLength: 3
-        maxLength: 50
+        minLength: 2
+        maxLength: 120
   schemas:
     ID:
       type: string
       example: 789d995f-3aa0-4bf8-a77b-2f2f20868503
       description: UUID
+    DATETIME:
+      type: string
+      format: date-time
+      example: 2017-07-21T17:32:28Z
+    GLOBAL_NAME:
+      type: string
+      description: Уникальное имя статьи для глобального справочника, может содержать только буквы в нижнем регистре, цифры и подчёркивание(_).
+      minLength: 1
+      maxLength: 120
+      pattern: '^[a-z0-9_\-]*$'
+      example: "about_app"
     Token:
       type: object
       required:
@@ -787,62 +816,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Profile"
-    ClientNew:
-      type: object
-      required:
-        - name
-        - last_name
-        - mobile_phone
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          example: "Jhon"
-        last_name:
-          type: string
-          example: "Doe"
-        mobile_phone:
-          type: string
-          pattern: '^7\d{10}$'
-          example: "71234567890"
-        description:
-          type: string
-          example: "Best client!"
-    Client:
-      type: object
-      required:
-        - id
-        - name
-        - last_name
-        - mobile_phone
-      additionalProperties: false
-      properties:
-        id:
-          $ref: "#/components/schemas/ID"
-        name:
-          type: string
-          example: "Jhon"
-        last_name:
-          type: string
-          example: "Doe"
-        mobile_phone:
-          type: string
-          pattern: '^7\d{10}$'
-          example: "71234567890"
-        description:
-          type: string
-          example: "Best client!"
-    ClientsList:
-      type: object
-      required:
-        - items
-      properties:
-        _metadata:
-          $ref: '#/components/schemas/Metadata'
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/Client"
     File:
       type: object
       required:
@@ -889,6 +862,148 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/File"
+    ArticleNew:
+      type: object
+      required:
+        - title
+        - announce
+        - content
+        - author
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          example: "Ведение шайбы в основной стойке, короткое, на месте"
+        content:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками. Ведение без отрыва клюшки от шайбы, по прямой по дуге. Ведение ... "
+        announce:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками..."
+        main_picture_id:
+          $ref: "#/components/schemas/ID"
+        main_video_id:
+          $ref: "#/components/schemas/ID"
+        author:
+          type: string
+          example: "Кононенко Юрий"
+        author_picture_id:
+          $ref: "#/components/schemas/ID"
+        global_name:
+          $ref: "#/components/schemas/GLOBAL_NAME"
+    Article:
+      type: object
+      required:
+        - id
+        - title
+        - announce
+        - content
+        - author
+        - datetime_created
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        title:
+          type: string
+          example: "Ведение шайбы в основной стойке, короткое, на месте"
+        announce:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками..."
+        content:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками. Ведение без отрыва клюшки от шайбы, по прямой по дуге. Ведение ... "
+        main_picture:
+          $ref: "#/components/schemas/File"
+        main_video:
+          $ref: "#/components/schemas/File"
+        author:
+          type: string
+          example: "Кононенко Юрий"
+        author_picture:
+          $ref: "#/components/schemas/File"
+        datetime_created:
+          $ref: "#/components/schemas/DATETIME"
+        global_name:
+          $ref: "#/components/schemas/GLOBAL_NAME"
+    ArticleAnnounce:
+      type: object
+      required:
+        - id
+        - title
+        - announce
+        - author
+        - datetime_created
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        title:
+          type: string
+          example: "Ведение шайбы в основной стойке, короткое, на месте"
+        announce:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками..."
+        main_picture:
+          $ref: "#/components/schemas/File"
+        author:
+          type: string
+          example: "Кононенко Юрий"
+        author_picture:
+          $ref: "#/components/schemas/File"
+        datetime_created:
+          $ref: "#/components/schemas/DATETIME"
+    ArticleUpdate:
+      type: object
+      required:
+        - id
+        - title
+        - announce
+        - content
+        - author
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        title:
+          type: string
+          example: "Ведение шайбы в основной стойке, короткое, на месте"
+        content:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками. Ведение без отрыва клюшки от шайбы, по прямой по дуге. Ведение ... "
+        announce:
+          type: string
+          example: "Обучение держанию клюшки одной, двумя руками..."
+        main_picture_id:
+          $ref: "#/components/schemas/ID"
+        main_video_id:
+          $ref: "#/components/schemas/ID"
+        author:
+          type: string
+          example: "Кононенко Юрий"
+        author_picture_id:
+          $ref: "#/components/schemas/ID"
+        global_name:
+          $ref: "#/components/schemas/GLOBAL_NAME"
+    ArticlesList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArticleAnnounce"
+    Directories:
+      type: object
+      properties:
+        articles:
+          type: object
+          description: |
+            Список статей которые используются для формирования статичной
+            информации, например "О приложении".
     Search:
       type: object
       required:

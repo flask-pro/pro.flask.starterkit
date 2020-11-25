@@ -1,10 +1,10 @@
-from nucleus.controllers.profiles import Profile
-from nucleus.controllers.users import User
+from nucleus.controllers.profiles import profile_controller
+from nucleus.controllers.users import user_controller
 from nucleus.models.profiles import Profiles as ProfilesModel
 
 
 class Account:
     @classmethod
     def get_profile(cls, user_id: str) -> ProfilesModel:
-        user = User.get(user_id)
-        return Profile.get(user.profiles.id)
+        user = user_controller.get(user_id)
+        return profile_controller.get(user.profiles.id)

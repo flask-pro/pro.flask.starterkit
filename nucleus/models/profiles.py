@@ -3,7 +3,6 @@ from nucleus.models.base import Base
 
 
 class Profiles(Base):
-    __searchable__ = ["name", "lastname", "description"]
     __sortable__ = ["name", "lastname"]
 
     name = db.Column(db.String, comment="Name")

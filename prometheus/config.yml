@@ -15,7 +15,7 @@ scrape_configs:
   - job_name: 'example'
 
     dns_sd_configs:
-      - names: ['stage_app']
+      - names: ['staging_app']
         port: 5000
         type: A
         refresh_interval: 5s

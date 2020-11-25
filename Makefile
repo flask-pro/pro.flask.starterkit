@@ -10,7 +10,8 @@ reset:
 	# Reset all conteiners create in project.
 	echo "" > .env
 	docker-compose -f docker-compose.dev.yml down --volumes --remove-orphans
-	docker-compose -f docker-compose.stage.yml down --volumes --remove-orphans
+	docker-compose -f docker-compose.staging.yml down --volumes --remove-orphans
+	rm -rf .env staging.tmp staging.zip
 
 test_containers_start: reset
 	# Run container with database.
@@ -25,15 +26,16 @@ run: test_containers_start
 	# Run application for development.
 	sh run_nucleus.sh dev.env
 
-run_stage_instance: reset
-	# Run project in docker containers
+build_staging_release: reset
 	docker build nucleus -t nucleus
-	cp stage.env .env
-	unzip -p stage.env.zip >> .env
-	docker-compose -f docker-compose.stage.yml up
+	docker save nucleus:latest > testing.tmp
+	cp staging.env .env
+	unzip -p staging.env.zip >> .env
+	zip -r staging.zip docker-compose.staging.yml .env staging.tmp grafana nginx prometheus
 
-log_stage_instance:
-	docker logs stage_app
+run_staging_instance: build_staging_release
+	# Run project in docker containers
+	docker-compose -f docker-compose.staging.yml up
 
 format:
 	# Run checking and formatting sources.

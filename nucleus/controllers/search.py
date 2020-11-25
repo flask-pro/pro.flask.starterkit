@@ -1,22 +1,24 @@
-from flask import current_app
-
 from nucleus.common.errors import NoResultSearch
-from nucleus.models.clients import Clients as ClientsModel
+from nucleus.common.search import FulltextSearch
+from nucleus.config import Config
+from nucleus.models.articles import Articles as ArticlesModel
+
+ITEMS_PER_PAGE = Config.ITEMS_PER_PAGE
 
 
 class Search:
     """Management of the search."""
 
-    MODELS_MAP = {"clients": ClientsModel}
+    MODELS_MAP = {"articles": ArticlesModel}
 
     @classmethod
     def results_list(cls, parameters: dict) -> dict:
-        ITEMS_PER_PAGE = current_app.config["ITEMS_PER_PAGE"]
 
         model = cls.MODELS_MAP.get(parameters["scope"])
 
         if model:
-            query = model.search(
+            ids, pagination = FulltextSearch.query_index(
+                model,
                 parameters["q"],
                 int(parameters.get("page", 1)),
                 int(parameters.get("per_page", ITEMS_PER_PAGE)),
@@ -24,7 +26,7 @@ class Search:
         else:
             raise NoResultSearch(f"Model <{model}> not allow to search. | parameters: {parameters}")
 
-        items = [item.to_dict() for item in query[0].all()]
+        items = [item.to_dict() for item in model.query.filter(model.id.in_(ids)).all()]
         result = {"items": items}
 
         if parameters.get("include_metadata", False):
@@ -33,7 +35,7 @@ class Search:
                     "page": parameters.get("page", 1),
                     "per_page": parameters.get("per_page", ITEMS_PER_PAGE),
                     "pages": 0,
-                    "items": query[1]["value"],
+                    "items": pagination["value"],
                 }
             }
         return result
@@ -42,11 +44,8 @@ class Search:
     def reindex(cls, parameters: dict) -> str:
         model = cls.MODELS_MAP.get(parameters["scope"])
 
-        if model:
-            model.reindex()
-        else:
-            raise NoResultSearch(
-                f"Model <{model}> not allow to reindex. | parameters: {parameters}"
-            )
+        items = model.query.all()
+        for item in items:
+            FulltextSearch.add_to_index(item)
 
         return "OK"

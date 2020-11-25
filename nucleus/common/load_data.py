@@ -1,7 +1,7 @@
 from flask import current_app
 from sqlalchemy.exc import IntegrityError
 
-from nucleus.controllers.users import User
+from nucleus.controllers.users import user_controller
 from nucleus.models.users import Roles
 
 roles = [
@@ -16,7 +16,7 @@ def load_init_data() -> bool:
     """Load initial data when the application starts."""
     try:
         Roles.bulk_create(roles)
-        User.create(user_admin)
+        user_controller.create(user_admin)
     except IntegrityError as err:
         current_app.logger.info(f"Load init data | error load user | {repr(err)}")
     return True

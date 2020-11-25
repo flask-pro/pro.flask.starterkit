@@ -17,10 +17,11 @@ class TestConfig(Config):
     FILES_URL = "/v1/files"
     ROLES_URL = "/v1/roles"
     USERS_URL = "/v1/users"
-    CLIENTS_URL = "/v1/clients"
     SEARCH_URL = "/v1/search"
     PROFILES_URL = "/v1/profiles"
     ACCOUNTS_URL = "/v1/accounts"
+    DIRECTORIES_URL = "/v1/directories"
+    ARTICLES_URL = "/v1/articles"
 
     # Blueprints routes.
     MAIN_URL = "/"

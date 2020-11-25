@@ -9,7 +9,7 @@ from jose import JWTError
 
 from nucleus.common.decorators import role_admin_or_user_required
 from nucleus.controllers.auth import Auth
-from nucleus.controllers.users import User
+from nucleus.controllers.users import user_controller
 
 
 def decode_token(token):
@@ -20,7 +20,7 @@ def decode_token(token):
             algorithms=[current_app.config["JWT_ALGORITHM"]],
         )
 
-        g.user = User.get(token["sub"])
+        g.user = user_controller.get(token["sub"])
 
         return token
     except JWTError:

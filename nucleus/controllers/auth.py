@@ -5,7 +5,7 @@ from flask import current_app
 from jose import jwt
 from werkzeug.security import check_password_hash
 
-from nucleus.controllers.users import User
+from nucleus.controllers.users import user_controller
 from nucleus.models.users import Users
 
 
@@ -51,4 +51,4 @@ class Auth:
 
     @classmethod
     def signup(cls, user: dict) -> dict:
-        return User.create(user).to_dict()
+        return user_controller.create(user).to_dict()

@@ -1,38 +1,54 @@
+from flask_sqlalchemy import Pagination
+
 from nucleus.common.extensions import db
+from nucleus.config import Config
+
+ITEMS_PER_PAGE = Config.ITEMS_PER_PAGE
+MAX_PER_PAGE = Config.MAX_PER_PAGE
 
 
 class Items:
-    ITEMS_PER_PAGE = 30
-    MAX_PER_PAGE = 100
-
     def __init__(self, model: db.Model, include_metadata: bool = False) -> None:
+        self._model = model
         self._query = model.query
         self._metadata = {}
         self.include_metadata = include_metadata
 
-    def _pagination(self, page: int, per_page: int) -> None:
+    def _filtration(self, parameters: dict) -> None:
+        """Добавление условий фильтрации в запрос."""
+
+        for field in self._model.__filterable__:
+            if field in parameters:
+                self._query = self._query.filter_by(**{field: parameters[field]})
+
+    def _pagination(self, parameters: dict) -> Pagination:
         """Create pagination object."""
 
-        self._query = self._query.paginate(
-            page=page, per_page=per_page, max_per_page=self.MAX_PER_PAGE
+        page = int(parameters.get("page", 1))
+        per_page = int(parameters.get("per_page", ITEMS_PER_PAGE))
+
+        paginated_query = self._query.paginate(
+            page=page, per_page=per_page, max_per_page=MAX_PER_PAGE
         )
         if self.include_metadata:
             self._metadata["pagination"] = {
-                "page": self._query.page,
-                "per_page": self._query.per_page,
-                "pages": self._query.pages,
-                "items": self._query.total,
+                "page": paginated_query.page,
+                "per_page": paginated_query.per_page,
+                "pages": paginated_query.pages,
+                "items": paginated_query.total,
             }
+        return paginated_query
 
-    def result(self, page: int = 1, per_page: int = None) -> dict:
+    def result(self, parameters: dict, announce: bool = False) -> dict:
         """Make query result."""
 
-        if not per_page:
-            per_page = self.ITEMS_PER_PAGE
+        self._filtration(parameters)
+        paginated_result = self._pagination(parameters)
 
-        self._pagination(page, per_page)
-
-        items = {"items": [item.to_dict() for item in self._query.items]}
+        if announce:
+            items = {"items": [item.announce_to_dict() for item in paginated_result.items]}
+        else:
+            items = {"items": [item.to_dict() for item in paginated_result.items]}
         if self.include_metadata:
             items["_metadata"] = self._metadata
 
@@ -51,6 +67,9 @@ class ModelManager:
 
     def get(self, id_: str) -> db.Model:
         return self._model.query.filter_by(id=id_).one()
+
+    def get_all_items(self) -> db.Model:
+        return self._model.query.all()
 
     def update(self, id_: str, params: dict) -> db.Model:
         return self.patch(id_, params)

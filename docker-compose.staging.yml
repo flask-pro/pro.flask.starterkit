@@ -1,7 +1,20 @@
 version: '3'
 services:
-    stage_db:
-        container_name: stage_db
+    staging_nginx:
+        container_name: staging_nginx
+        image: "nginx:1.18-alpine"
+        volumes:
+            - "./nginx/staging.nginx:/etc/nginx/conf.d/default.conf"
+        ports:
+            - "80:80"
+        networks:
+            - nginx_net
+        depends_on:
+            - staging_app
+        logging:
+            driver: none
+    staging_db:
+        container_name: staging_db
         image: "postgres:12-alpine"
         volumes:
             - "db_vol:/var/lib/postgresql/data"
@@ -10,8 +23,8 @@ services:
             - db_net
         logging:
             driver: none
-    stage_es:
-        container_name: stage_es
+    staging_es:
+        container_name: staging_es
         image: "elasticsearch:7.9.3"
         environment:
             - discovery.type=single-node
@@ -22,22 +35,24 @@ services:
             - es_net
         logging:
             driver: none
-    stage_app:
-        container_name: stage_app
+    staging_app:
+        container_name: staging_app
         image: "nucleus:latest"
         env_file: .env
         ports:
             - "127.0.0.1:8010:5000"
         networks:
+            - nginx_net
             - db_net
             - es_net
             - metrics_net
         depends_on:
-            - stage_db
-            - stage_es
-    stage_prometheus:
-        container_name: stage_prometheus
-        image: prom/prometheus:v2.22.1
+            - staging_db
+            - staging_es
+        restart: always
+    staging_prometheus:
+        container_name: staging_prometheus
+        image: prom/prometheus:v2.22.2
         volumes:
             - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
         ports:
@@ -45,14 +60,13 @@ services:
         networks:
             - metrics_net
         depends_on:
-            - stage_es
-            - stage_app
+            - staging_es
+            - staging_app
         logging:
             driver: none
-    stage_grafana:
-        container_name: stage_grafana
-        image: grafana/grafana:7.3.2
-        user: "1000"
+    staging_grafana:
+        container_name: staging_grafana
+        image: grafana/grafana:7.3.3
         volumes:
             - ./grafana/config.ini:/etc/grafana/grafana.ini
             - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/default.yaml
@@ -63,11 +77,13 @@ services:
         networks:
             - metrics_net
         depends_on:
-            - stage_app
-            - stage_prometheus
+            - staging_app
+            - staging_prometheus
         logging:
             driver: none
 networks:
+    nginx_net:
+        driver: bridge
     db_net:
         driver: bridge
     es_net:

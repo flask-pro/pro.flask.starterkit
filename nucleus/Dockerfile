@@ -9,6 +9,8 @@ COPY . ./
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get -y install gcc \
+    && apt-get -y autoremove \
+    && apt-get -y autoclean \
     && pip install --upgrade pip \
     && pip install -r requirements.txt \
     && pip install uwsgi

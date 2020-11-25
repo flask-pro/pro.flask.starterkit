@@ -2,14 +2,13 @@ import uuid
 from datetime import datetime
 
 from nucleus.common.extensions import db
-from nucleus.common.search import FullTextSearchMixin
 
 
 def make_uuid4() -> str:
     return str(uuid.uuid4())
 
 
-class Base(FullTextSearchMixin, db.Model):
+class Base(db.Model):
     """Base class for table.
 
     * **id** - Integer - unique identifier
@@ -22,10 +21,9 @@ class Base(FullTextSearchMixin, db.Model):
     """
 
     __abstract__ = True
-
-    __searchable__ = ["description"]
     __filterable__ = ["id"]
     __sortable__ = ["datetime_created"]
+    __files__ = []
 
     id = db.Column(db.String, primary_key=True, index=True, default=make_uuid4, comment="ID")
     description = db.Column(db.Text, comment="Description")
