@@ -7,7 +7,10 @@ logging_configuration = {
         },
         "long_formatter": {
             "class": "logging.Formatter",
-            "format": "%(levelname)s | %(module)s:%(funcName)s:%(lineno)s | %(message)s",
+            "format": "%(asctime)s "
+            "| %(levelname)s "
+            "| %(module)s:%(funcName)s:%(lineno)s "
+            "| %(message)s",
         },
     },
     "handlers": {
@@ -19,6 +22,7 @@ logging_configuration = {
     },
     "loggers": {
         "nucleus": {"level": "DEBUG", "handlers": ["console"]},
-        "connexion": {"handlers": ["console"]},
+        "connexion": {"level": "ERROR", "handlers": ["console"]},
+        "sqlalchemy.engine": {"level": "ERROR", "handlers": ["console"]},
     },
 }

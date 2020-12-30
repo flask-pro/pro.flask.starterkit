@@ -2,6 +2,7 @@ from typing import Tuple
 
 import connexion
 
+from nucleus.api.v1.utils import check_to_equality
 from nucleus.common.decorators import role_admin_or_user_required
 from nucleus.common.decorators import role_admin_required
 from nucleus.controllers.users import role_controller
@@ -25,12 +26,25 @@ def get_user(id) -> dict:
 
 @role_admin_or_user_required
 def update_user(id) -> dict:
-    return user_controller.update(id, connexion.request.json).to_dict()
+    parameters = connexion.request.json
+    check_to_equality(id, "id", parameters)
+    return user_controller.update(parameters).to_dict()
 
 
 @role_admin_required
 def delete_user(id) -> Tuple:
-    return user_controller.delete(id), 204
+    user_controller.delete(id)
+    return None, 204
+
+
+@role_admin_required
+def block_user(id) -> dict:
+    return user_controller.block(id).to_dict()
+
+
+@role_admin_required
+def unblock_user(id) -> dict:
+    return user_controller.unblock(id).to_dict()
 
 
 @role_admin_required
@@ -50,9 +64,12 @@ def get_role(id) -> dict:
 
 @role_admin_required
 def update_role(id) -> dict:
-    return role_controller.update(id, connexion.request.json).to_dict()
+    parameters = connexion.request.json
+    check_to_equality(id, "id", parameters)
+    return role_controller.update(parameters).to_dict()
 
 
 @role_admin_required
 def delete_role(id) -> Tuple:
-    return role_controller.delete(id), 204
+    role_controller.delete(id)
+    return None, 204

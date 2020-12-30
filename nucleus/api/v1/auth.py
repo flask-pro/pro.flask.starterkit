@@ -8,11 +8,14 @@ from jose import jwt
 from jose import JWTError
 
 from nucleus.common.decorators import role_admin_or_user_required
+from nucleus.config import Config
 from nucleus.controllers.auth import Auth
 from nucleus.controllers.users import user_controller
 
+CDN_SECRET = Config.CDN_SECRET
 
-def decode_token(token):
+
+def decode_token(token) -> str:
     try:
         token = jwt.decode(
             token,
@@ -20,7 +23,12 @@ def decode_token(token):
             algorithms=[current_app.config["JWT_ALGORITHM"]],
         )
 
-        g.user = user_controller.get(token["sub"])
+        user = user_controller.get(token["sub"])
+
+        if user.is_blocked:
+            abort(401, "User is blocked!")
+
+        g.user = user
 
         return token
     except JWTError:
@@ -29,6 +37,12 @@ def decode_token(token):
 
 def basic_auth(username, password, required_scopes=None) -> dict:
     return {"sub": Auth.login(username, password)}
+
+
+def apikey_auth(token, required_scopes=None) -> dict:
+    if token != CDN_SECRET:
+        abort(401, "CDN token broken!")
+    return {"sub": "CDN"}
 
 
 def signup() -> Tuple[dict, int]:

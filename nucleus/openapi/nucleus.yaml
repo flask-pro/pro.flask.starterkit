@@ -22,6 +22,10 @@ tags:
     description: Manage search.
   - name: articles
     description: Manage articles.
+  - name: feedbacks
+    description: Manage feedbacks.
+  - name: logs
+    description: Manage logs.
 paths:
   /signup:
     post:
@@ -46,6 +50,15 @@ paths:
       tags:
         - auth
       summary: Return secret string
+      description: |
+        После успешной регистрации в системе, необходимо авторизоваться через данный эндпоинт,
+        с помощью логина и пароля.
+
+        В ответе будет отправлен `access_token`, который необходимо использовать в заголовке
+        запроса, в формате `Bearer` - `"Authorization": Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6I
+        kpXVCJ9.eyJpc3MiOiJyZWRfbWFjaGluZSIsI5lhdCI6MTYwNzA5OTQ5NSwiZXhwIjoxNjA3MTAzMDk1LCJz
+        dWIiOiJmZWJkY2U2Yy01N2M0LTQxZDEtOTQwZC04YjM5YjgyZGQwOTIifQ.8r7rqi75LdpAi2dqhVgCuobFe
+        A1PZJKo_4j9iCo54zo`
       operationId: nucleus.api.v1.auth.login
       responses:
         '201':
@@ -169,6 +182,40 @@ paths:
       responses:
         '204':
           description: OK
+      security:
+        - jwt: []
+  /users/{id}/block:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    put:
+      tags:
+        - users
+      operationId: nucleus.api.v1.users.block_user
+      summary: Заблокировать пользователя
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - jwt: []
+  /users/{id}/unblock:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    put:
+      tags:
+        - users
+      operationId: nucleus.api.v1.users.unblock_user
+      summary: Разблокировать пользователя
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
       security:
         - jwt: []
   /roles:
@@ -429,7 +476,7 @@ paths:
               schema:
                 type: string
                 format: binary
-  /files/download/{id}/thumbnail/:
+  /files/download/{id}/thumbnail:
     parameters:
       - $ref: "#/components/parameters/id"
     get:
@@ -439,6 +486,42 @@ paths:
       operationId: nucleus.api.v1.files.download_thumbnail
       security:
         - jwt: []
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+  /files/cdn/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - files
+      summary: Эндпоинт для интеграции с CDN
+      operationId: nucleus.api.v1.files.cdn_download_file
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+  /files/cdn/{id}/thumbnail:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - files
+      summary: Эндпоинт для интеграции с CDN
+      operationId: nucleus.api.v1.files.cdn_download_thumbnail
+      security:
+        - api_key: []
       responses:
         "200":
           description: OK
@@ -493,11 +576,12 @@ paths:
       tags:
         - articles
       operationId: nucleus.api.v1.articles.get_articles_list
-      summary: Return global article list
+      summary: Возвращает глобальный список статей
       parameters:
         - $ref: "#/components/parameters/include_metadata"
         - $ref: "#/components/parameters/page"
         - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/author"
       responses:
         '200':
           description: OK
@@ -505,11 +589,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ArticlesList"
+      security:
+        - jwt: []
     post:
       tags:
         - articles
       operationId: nucleus.api.v1.articles.create_article
-      summary: Create article
+      summary: Создание статьи
       description: |
         Изображения предварительно загружаются через метод `POST /files`,
         полученные `id` файлов, используется здесь.
@@ -538,7 +624,7 @@ paths:
       tags:
         - articles
       operationId: nucleus.api.v1.articles.get_article
-      summary: Get article
+      summary: Получение статьи
       responses:
         '200':
           description: OK
@@ -550,7 +636,7 @@ paths:
       tags:
         - articles
       operationId: nucleus.api.v1.articles.update_article
-      summary: Update article
+      summary: Редактирование статьи
       responses:
         '200':
           description: OK
@@ -569,7 +655,7 @@ paths:
       tags:
         - articles
       operationId: nucleus.api.v1.articles.delete_article
-      summary: Delete article
+      summary: Удаление статьи
       responses:
         '204':
           description: OK
@@ -580,7 +666,10 @@ paths:
       tags:
         - directories
       operationId: nucleus.api.v1.directories.get_directories
-      summary: Return global directory.
+      summary: Возвращает глобальный справочник
+      description: |
+        Глобальный справочник содержит различные фиксированные справочники, например "Категории",
+        а также статьи для поддержки статичных страниц и экранов.
       responses:
         '200':
           description: OK
@@ -588,6 +677,201 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Directories"
+      security:
+        - jwt: []
+  /directories/categories:
+    get:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.get_categories_list
+      summary: Возвращает список категорий
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/content_type"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoriesList"
+      security:
+        - jwt: []
+    post:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.create_category
+      summary: Создание категории
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryNew"
+        required: true
+      security:
+        - jwt: []
+  /directories/categories/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.get_category
+      summary: Получение категории
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+      security:
+        - jwt: []
+    put:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.update_category
+      summary: Редактирование категории
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      security:
+        - jwt: []
+    delete:
+      tags:
+        - directories
+      operationId: nucleus.api.v1.directories.delete_category
+      summary: Удаление категории
+      responses:
+        '204':
+          description: OK
+      security:
+        - jwt: []
+  /feedbacks:
+    get:
+      tags:
+        - feedbacks
+      operationId: nucleus.api.v1.feedbacks.get_feedbacks_list
+      summary: Возвращает список вопросов от пользователей
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/category_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbacksList"
+      security:
+        - jwt: []
+    post:
+      tags:
+        - feedbacks
+      operationId: nucleus.api.v1.feedbacks.create_feedback
+      summary: Создание вопроса для обратной связи
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackNew"
+        required: true
+      security:
+        - jwt: []
+  /feedbacks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags:
+        - feedbacks
+      operationId: nucleus.api.v1.feedbacks.get_feedback
+      summary: Получение вопроса
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+    put:
+      tags:
+        - feedbacks
+      operationId: nucleus.api.v1.feedbacks.update_feedback
+      summary: Редактирование вопроса
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackUpdate"
+      security:
+        - jwt: []
+    delete:
+      tags:
+        - feedbacks
+      operationId: nucleus.api.v1.feedbacks.delete_feedback
+      summary: Удаление вопроса
+      responses:
+        '204':
+          description: OK
+      security:
+        - jwt: []
+  /logs:
+    get:
+      tags:
+        - logs
+      operationId: nucleus.api.v1.logs.get_logs_list
+      summary: Возвращает технологический журнал
+      parameters:
+        - $ref: "#/components/parameters/include_metadata"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/username"
+        - $ref: "#/components/parameters/event"
+        - $ref: "#/components/parameters/start_datetime_created"
+        - $ref: "#/components/parameters/end_datetime_created"
+      security:
+        - jwt: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogsItemsList"
 components:
   parameters:
     include_metadata:
@@ -642,6 +926,60 @@ components:
         example: "Search"
         minLength: 2
         maxLength: 120
+    author:
+      in: query
+      name: author
+      description: Имя автора статьи.
+      schema:
+        type: string
+        example: Автор статьи
+        minLength: 1
+        maxLength: 50
+    category_id:
+      name: category_id
+      in: query
+      description: id категории.
+      schema:
+        type: string
+        format: uuid
+        example: 789d995f-3aa0-4bf8-a37b-2f2f2086d503
+    content_type:
+      name: content_type
+      in: query
+      description: Тип сущности к которому применяется категория.
+      schema:
+        type: string
+        enum: [articles, feedbacks]
+    username:
+      name: username
+      in: query
+      description: Имя пользователя.
+      schema:
+        type: string
+        example: example_user
+    event:
+      name: event
+      in: query
+      description: Идентификатор события лога.
+      schema:
+        type: string
+        enum: [user_signup, user_created, user_blocked, user_unblocked, user_deleted]
+    start_datetime_created:
+      name: start_datetime_created
+      in: query
+      description: Начальные дата и время событий лога.
+      schema:
+        type: string
+        format: date-time
+        example: 2020-12-13T06:13:00.199194Z
+    end_datetime_created:
+      name: end_datetime_created
+      in: query
+      description: Конечные дата и время событий лога.
+      schema:
+        type: string
+        format: date-time
+        example: 2020-12-13T06:13:00.199194Z
   schemas:
     ID:
       type: string
@@ -650,7 +988,7 @@ components:
     DATETIME:
       type: string
       format: date-time
-      example: 2017-07-21T17:32:28Z
+      example: 2020-12-13T06:13:00.199194Z
     GLOBAL_NAME:
       type: string
       description: Уникальное имя статьи для глобального справочника, может содержать только буквы в нижнем регистре, цифры и подчёркивание(_).
@@ -658,6 +996,9 @@ components:
       maxLength: 120
       pattern: '^[a-z0-9_\-]*$'
       example: "about_app"
+    CONTENT_TYPE:
+      type: string
+      enum: [articles, feedbacks]
     Token:
       type: object
       required:
@@ -719,6 +1060,9 @@ components:
           example: "user"
         profile_id:
           $ref: "#/components/schemas/ID"
+        is_blocked:
+          type: boolean
+          example: False
     UsersList:
       type: object
       required:
@@ -996,14 +1340,210 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ArticleAnnounce"
+    CategoryNew:
+      type: object
+      required:
+        - name
+        - content_type
+      additionalProperties: false
+      properties:
+        icon_id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: "Физическая подготовка"
+        content_type:
+          $ref: "#/components/schemas/CONTENT_TYPE"
+    CategoryUpdate:
+      type: object
+      required:
+        - id
+        - name
+        - content_type
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        icon_id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: "Физическая подготовка"
+        content_type:
+          $ref: "#/components/schemas/CONTENT_TYPE"
+    Category:
+      type: object
+      required:
+        - id
+        - name
+        - content_type
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        icon:
+          $ref: "#/components/schemas/File"
+        name:
+          type: string
+          example: "Физическая подготовка"
+        content_type:
+          $ref: "#/components/schemas/CONTENT_TYPE"
+    CategoriesList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
     Directories:
       type: object
       properties:
+        feedbacks:
+          type: object
+          required:
+            - categories
+          properties:
+            categories:
+              type: array
+              items:
+                $ref: "#/components/schemas/Category"
         articles:
           type: object
           description: |
             Список статей которые используются для формирования статичной
             информации, например "О приложении".
+    FeedbackNew:
+      type: object
+      required:
+        - email
+        - title
+        - message
+        - category_id
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          example: email@example.com
+        mobile_phone:
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: "71234567890"
+        title:
+          type: string
+          example: "Не отображаются результаты опросов"
+        message:
+          type: string
+          example: "Не отображаются результаты опросов для незарегистрированного пользователя."
+        category_id:
+          $ref: "#/components/schemas/ID"
+    Feedback:
+      type: object
+      required:
+        - id
+        - email
+        - title
+        - message
+        - category_id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        email:
+          type: string
+          format: email
+          example: email@example.com
+        mobile_phone:
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: "71234567890"
+        title:
+          type: string
+          example: "Не отображаются результаты опросов"
+        message:
+          type: string
+          example: "Не отображаются результаты опросов для незарегистрированного пользователя."
+        category_id:
+          $ref: "#/components/schemas/ID"
+    FeedbackUpdate:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        email:
+          type: string
+          format: email
+          example: email@example.com
+        mobile_phone:
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: "71234567890"
+        title:
+          type: string
+          example: "Не отображаются результаты опросов"
+        message:
+          type: string
+          example: "Не отображаются результаты опросов для незарегистрированного пользователя."
+        category_id:
+          $ref: "#/components/schemas/ID"
+    FeedbacksList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Feedback"
+    LogItem:
+      type: object
+      required:
+        - id
+        - username
+        - event
+        - message
+        - datetime_created
+      additionalProperties: false
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        username:
+          type: string
+          example: example_username
+        event:
+          type: string
+          example: "user_created"
+        message:
+          type: string
+          example: "Пользователь создан"
+        description:
+          type: string
+          example: "Пользователь создан автоматически."
+        datetime_created:
+          $ref: "#/components/schemas/DATETIME"
+    LogsItemsList:
+      type: object
+      required:
+        - items
+      properties:
+        _metadata:
+          $ref: '#/components/schemas/Metadata'
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogItem"
     Search:
       type: object
       required:
@@ -1059,3 +1599,8 @@ components:
       scheme: bearer
       bearerFormat: JWT
       x-bearerInfoFunc: nucleus.api.v1.auth.decode_token
+    api_key:
+      type: apiKey
+      name: "X-CDN-Secret"
+      in: header
+      x-apikeyInfoFunc: nucleus.api.v1.auth.apikey_auth

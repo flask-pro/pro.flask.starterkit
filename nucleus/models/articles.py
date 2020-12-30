@@ -34,13 +34,10 @@ class Articles(Base):
             "author": self.author,
             "datetime_created": self.datetime_created,
             "global_name": self.global_name,
+            "main_picture": self.main_picture.to_dict() if self.main_picture else None,
+            "main_video": self.main_video.to_dict() if self.main_video else None,
+            "author_picture": self.author_picture.to_dict() if self.author_picture else None,
         }
-        if self.main_picture:
-            article["main_picture"] = self.main_picture.to_dict()
-        if self.main_video:
-            article["main_video"] = self.main_video.to_dict()
-        if self.author_picture:
-            article["author_picture"] = self.author_picture.to_dict()
         return self.non_empty_parameters_to_dict(article)
 
     def announce_to_dict(self) -> dict:
@@ -50,11 +47,9 @@ class Articles(Base):
             "announce": self.announce,
             "author": self.author,
             "datetime_created": self.datetime_created,
+            "main_picture": self.main_picture.to_dict() if self.main_picture else None,
+            "author_picture": self.author_picture.to_dict() if self.author_picture else None,
         }
-        if self.main_picture:
-            article["main_picture"] = self.main_picture.to_dict()
-        if self.author_picture:
-            article["author_picture"] = self.author_picture.to_dict()
         return self.non_empty_parameters_to_dict(article)
 
     def dict_to_search(self) -> dict:

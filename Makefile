@@ -26,6 +26,10 @@ run: test_containers_start
 	# Run application for development.
 	sh run_nucleus.sh dev.env
 
+format:
+	# Run checking and formatting sources.
+	./venv/bin/pre-commit run -a
+
 build_staging_release: reset
 	docker build nucleus -t nucleus
 	docker save nucleus:latest > testing.tmp
@@ -36,7 +40,3 @@ build_staging_release: reset
 run_staging_instance: build_staging_release
 	# Run project in docker containers
 	docker-compose -f docker-compose.staging.yml up
-
-format:
-	# Run checking and formatting sources.
-	./venv/bin/pre-commit run -a

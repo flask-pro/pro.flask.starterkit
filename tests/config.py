@@ -10,7 +10,7 @@ class TestConfig(Config):
 
     BASE_DIR = basedir
 
-    ENV = "testing"
+    TESTING = True
     DEBUG = 1
 
     # API routes.
@@ -21,7 +21,10 @@ class TestConfig(Config):
     PROFILES_URL = "/v1/profiles"
     ACCOUNTS_URL = "/v1/accounts"
     DIRECTORIES_URL = "/v1/directories"
+    DIRECTORIES_CATEGORIES_URL = "/v1/directories/categories"
     ARTICLES_URL = "/v1/articles"
+    FEEDBACKS_URL = "/v1/feedbacks"
+    LOGS_URL = "/v1/logs"
 
     # Blueprints routes.
     MAIN_URL = "/"

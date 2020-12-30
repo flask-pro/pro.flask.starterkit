@@ -29,7 +29,7 @@ def error_msg(exc: Any, exc_info: bool = False) -> None:
     )
 
 
-def exception_error_msg(exc: Any) -> None:
+def exception_error_msg(exc: Exception) -> None:
     """Send error to telegram."""
 
     header = f"Attention! Instance <{Config.ENV}> | {datetime.now()}"
@@ -39,7 +39,10 @@ def exception_error_msg(exc: Any) -> None:
         f"    URL: {request.url}\n"
         f"    Headers: {dict(request.headers)}\n"
         f"    Arguments: {dict(request.args)}\n"
-        f"    Data: {request.data}"
+        f"    Data: {request.data}\n"
+        f"\n"
+        f"Exception:\n"
+        f"    Message: {repr(exc)}"
     )
     trace = f"Traceback (most recent call last):\n{''.join(traceback.format_tb(exc.__traceback__))}"
     message = f"{header}\n\n{request_params}\n\n{trace}"
@@ -78,7 +81,7 @@ def register_errors(app: Flask) -> Flask:
     @app.errorhandler(IntegrityError)
     def unique_obj_exist_in_db_exception(exc):
         """Exception for exist unique object in db."""
-        error_msg(exc)
+        error_msg(exc, exc_info=True)
         db.session.rollback()
         return {"code": 422, "name": "Unprocessable Entity", "description": "Object exists."}, 422
 

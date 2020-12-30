@@ -9,8 +9,6 @@ SEARCH_URL = TestConfig.SEARCH_URL
 
 
 def test_search__crud(fx_app, fx_auth_admin) -> None:
-    print("\n--> test_search__crud")
-
     # Create and search.
     new_article_data = {
         "title": "test_search_title",
@@ -70,14 +68,13 @@ def test_search__crud(fx_app, fx_auth_admin) -> None:
         query_string={"scope": "articles", "q": "updated_test_search_title"},
         headers=fx_auth_admin,
     )
-    assert search_result.status_code == 404
+    assert search_result.status_code == 200
+    assert not search_result.json["items"]
 
 
 def test_search(fx_app, fx_auth_admin, fx_search_articles) -> None:
-    print("\n--> test_search")
-
     search_result = fx_app.get(
-        f"{SEARCH_URL}", query_string={"scope": "articles", "q": "First"}, headers=fx_auth_admin
+        f"{SEARCH_URL}", query_string={"scope": "articles", "q": "Fir"}, headers=fx_auth_admin
     )
     assert search_result.status_code == 200
     assert search_result.json
@@ -90,8 +87,6 @@ def test_search(fx_app, fx_auth_admin, fx_search_articles) -> None:
 
 
 def test_search__metadata(fx_app, fx_auth_admin, fx_search_articles) -> None:
-    print("\n--> test_search__metadata")
-
     search_result = fx_app.get(
         f"{SEARCH_URL}",
         query_string={"scope": "articles", "q": "First", "include_metadata": "enable"},
@@ -103,20 +98,17 @@ def test_search__metadata(fx_app, fx_auth_admin, fx_search_articles) -> None:
 
 
 def test_search__bad_query(fx_app, fx_auth_admin, fx_search_articles) -> None:
-    print("\n--> test_search__bad_query")
-
     search_result = fx_app.get(
         f"{SEARCH_URL}",
         query_string={"scope": "articles", "q": "NON_EXIST_QUERY"},
         headers=fx_auth_admin,
     )
-    assert search_result.status_code == 404
+    assert search_result.status_code == 200
+    assert not search_result.json["items"]
 
 
 @pytest.mark.parametrize("scope", (("users"), ("files")))
 def test_search__bad_scope(fx_app, fx_auth_admin, fx_search_articles, scope) -> None:
-    print("\n--> test_search__bad_scope")
-
     search_result = fx_app.get(
         f"{SEARCH_URL}", query_string={"scope": scope, "q": "First"}, headers=fx_auth_admin
     )
@@ -124,8 +116,6 @@ def test_search__bad_scope(fx_app, fx_auth_admin, fx_search_articles, scope) -> 
 
 
 def test_search__reindex(fx_app, fx_auth_admin, fx_search_articles) -> None:
-    print("\n--> test_search__reindex")
-
     search_result = fx_app.get(
         f"{SEARCH_URL}/reindex", query_string={"scope": "articles"}, headers=fx_auth_admin
     )

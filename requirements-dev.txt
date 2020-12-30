@@ -1,13 +1,14 @@
 connexion==2.7.0
-elasticsearch==7.10.0
+elasticsearch==7.10.1
 Flask==1.1.2
 Flask-SQLAlchemy==2.4.4
 Pillow==8.0.1
-pre-commit==2.8.2
+pre-commit==2.9.3
 prometheus-flask-exporter==0.18.1
 psycopg2-binary==2.8.6
-pytest==6.1.2
+pytest==6.2.1
 pytest-cov==2.10.1
 python-dotenv==0.15.0
 python-jose==3.2.0
 swagger-ui-bundle==0.0.8
+Faker==5.1.0

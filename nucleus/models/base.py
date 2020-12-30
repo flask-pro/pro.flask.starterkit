@@ -22,19 +22,20 @@ class Base(db.Model):
 
     __abstract__ = True
     __filterable__ = ["id"]
+    __interval_filterable__ = ["datetime_created"]
     __sortable__ = ["datetime_created"]
     __files__ = []
 
     id = db.Column(db.String, primary_key=True, index=True, default=make_uuid4, comment="ID")
     description = db.Column(db.Text, comment="Description")
-    datetime_created = db.Column(db.DateTime, default=datetime.utcnow(), comment="Date create")
+    datetime_created = db.Column(db.DateTime, default=datetime.utcnow, comment="Date create")
     datetime_modified = db.Column(
-        db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), comment="Date modified"
+        db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow, comment="Date modified"
     )
 
     @classmethod
     def non_empty_parameters_to_dict(cls, parameters: dict) -> dict:
-        return {key: value for key, value in parameters.items() if value}
+        return {key: value for key, value in parameters.items() if value or isinstance(value, bool)}
 
     def __repr__(self):
         parameters = ", ".join([f"{key}={value}" for key, value in self.to_dict().items()])

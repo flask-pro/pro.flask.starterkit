@@ -16,12 +16,18 @@ class Search:
 
         model = cls.MODELS_MAP.get(parameters["scope"])
 
+        if parameters["scope"] in ["elements", "games", "exercises"]:
+            fields_to_filter = {"type": parameters["scope"]}
+        else:
+            fields_to_filter = None
+
         if model:
             ids, pagination = FulltextSearch.query_index(
                 model,
                 parameters["q"],
                 int(parameters.get("page", 1)),
                 int(parameters.get("per_page", ITEMS_PER_PAGE)),
+                fields_to_filter=fields_to_filter,
             )
         else:
             raise NoResultSearch(f"Model <{model}> not allow to search. | parameters: {parameters}")

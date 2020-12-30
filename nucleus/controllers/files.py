@@ -1,5 +1,4 @@
 import os
-from contextlib import suppress
 
 from flask import abort
 from PIL import Image
@@ -52,7 +51,7 @@ class File(BaseController):
             file.seek(0, os.SEEK_END)
             file_length = file.tell()
 
-            created_file = self.model_manager.patch(created_file.id, {"length": file_length})
+            created_file = self.model_manager.patch({"id": created_file.id, "length": file_length})
 
             if self._is_allow_extension(file.filename, EXTENSIONS_FOR_THUMBNAILS):
                 self.create_thumbnail(file, created_file.id)
@@ -60,13 +59,6 @@ class File(BaseController):
             return created_file
         else:
             abort(422, "File not allowed.")
-
-    def delete(self, id_: str) -> None:
-        file = self.model_manager.delete(id_)
-        file_path = os.path.join(FILES_BASE_DIR, file.id)
-        os.remove(file_path)
-        with suppress(FileNotFoundError):
-            os.remove(os.path.join(FILES_BASE_DIR, "thumbnails", file.id))
 
 
 file_controller = File(FilesModel)

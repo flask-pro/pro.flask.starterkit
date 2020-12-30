@@ -19,7 +19,23 @@ class Items:
 
         for field in self._model.__filterable__:
             if field in parameters:
-                self._query = self._query.filter_by(**{field: parameters[field]})
+                value = parameters[field]
+                if type(value) is list:
+                    self._query = self._query.filter(getattr(self._model, field).in_(value))
+                else:
+                    self._query = self._query.filter_by(**{field: value})
+
+    def _interval_filtration(self, parameters: dict) -> None:
+        for field in self._model.__interval_filterable__:
+            start_field = f"start_{field}"
+            if start_field in parameters:
+                value = parameters[start_field]
+                self._query = self._query.filter(getattr(self._model, field) >= value)
+
+            end_field = f"end_{field}"
+            if end_field in parameters:
+                value = parameters[end_field]
+                self._query = self._query.filter(getattr(self._model, field) < value)
 
     def _pagination(self, parameters: dict) -> Pagination:
         """Create pagination object."""
@@ -43,12 +59,15 @@ class Items:
         """Make query result."""
 
         self._filtration(parameters)
-        paginated_result = self._pagination(parameters)
+        self._interval_filtration(parameters)
+
+        result = self._pagination(parameters).items
 
         if announce:
-            items = {"items": [item.announce_to_dict() for item in paginated_result.items]}
+            items = {"items": [item.announce_to_dict() for item in result]}
         else:
-            items = {"items": [item.to_dict() for item in paginated_result.items]}
+            items = {"items": [item.to_dict() for item in result]}
+
         if self.include_metadata:
             items["_metadata"] = self._metadata
 
@@ -68,22 +87,19 @@ class ModelManager:
     def get(self, id_: str) -> db.Model:
         return self._model.query.filter_by(id=id_).one()
 
-    def get_all_items(self) -> db.Model:
-        return self._model.query.all()
+    def update(self, parameters: dict) -> db.Model:
+        return self.patch(parameters)
 
-    def update(self, id_: str, params: dict) -> db.Model:
-        return self.patch(id_, params)
-
-    def patch(self, id_: str, params: dict) -> db.Model:
-        row = self._model.query.filter_by(id=id_).one()
-        if params.get("id"):
-            del params["id"]
-        for key, value in params.items():
+    def patch(self, parameters: dict) -> db.Model:
+        row = self._model.query.filter_by(id=parameters["id"]).one()
+        if parameters.get("id"):
+            del parameters["id"]
+        for key, value in parameters.items():
             setattr(row, key, value)
         db.session.commit()
         return row
 
-    def delete(self, id_: str) -> None:
+    def delete(self, id_: str) -> db.Model:
         row = self._model.query.filter_by(id=id_).one()
         db.session.delete(row)
         db.session.commit()

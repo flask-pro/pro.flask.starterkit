@@ -16,18 +16,30 @@ def send_to_telegram(message: str):
         )
 
     else:
-        try:
-            response = requests.post(
-                f"{TELEGRAM_API_URL}{TELEGRAM_BOT_TOKEN}/sendMessage",
-                data={"chat_id": TELEGRAM_CHAT_ID, "text": message},
-            )
+        LINES_PER_MESSAGE = 50
 
-            if response.status_code != 200:
-                current_app.logger.warning(
-                    f"Telegram "
-                    f"| Bad response "
-                    f"| status code: {response.status_code} "
-                    f"| body: {response.text}"
+        lines = message.splitlines(True)
+
+        start_msg = 0
+        msg_chunk = lines[start_msg:LINES_PER_MESSAGE]
+        while msg_chunk:
+            text = "".join(msg_chunk)
+            try:
+                response = requests.post(
+                    f"{TELEGRAM_API_URL}{TELEGRAM_BOT_TOKEN}/sendMessage",
+                    data={"chat_id": TELEGRAM_CHAT_ID, "text": text},
                 )
-        except requests.exceptions.ConnectionError as exc:
-            current_app.logger.warning(f"Telegram | Connection error | {repr(exc)}")
+
+                if response.status_code != 200:
+                    current_app.logger.warning(
+                        f"Telegram "
+                        f"| Bad response "
+                        f"| status code: {response.status_code} "
+                        f"| body: {response.text}"
+                    )
+            except requests.exceptions.ConnectionError as exc:
+                current_app.logger.warning(f"Telegram | Connection error | {repr(exc)}")
+
+            start_msg = start_msg + LINES_PER_MESSAGE
+            end_msg = start_msg + LINES_PER_MESSAGE
+            msg_chunk = lines[start_msg:end_msg]

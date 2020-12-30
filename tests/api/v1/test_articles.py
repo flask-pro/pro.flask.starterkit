@@ -10,7 +10,6 @@ SEARCH_URL = TestConfig.SEARCH_URL
 def test_articles__crud(
     fx_app, fx_auth_admin, fx_test_file_non_deleted, fx_comparing_keys_values
 ) -> None:
-    print("\n--> test_articles__crud")
     new_article_data = {
         "title": "test_article_title",
         "announce": "test_article_announce",
@@ -90,18 +89,14 @@ def test_articles__crud(
 
 
 def test_articles__filter(fx_app, fx_auth_admin, fx_test_article) -> None:
-    print("\n--> test_articles__filter")
-
-    result_filter_by_category_id = fx_app.get(
+    result_filter_by_author = fx_app.get(
         ARTICLES_URL, headers=fx_auth_admin, query_string={"author": fx_test_article["author"]}
     )
-    assert result_filter_by_category_id.status_code == 200
-    assert len(result_filter_by_category_id.json["items"]) == 1
+    assert result_filter_by_author.status_code == 200
+    assert len(result_filter_by_author.json["items"]) == 1
 
 
 def test_articles__search(fx_app, fx_auth_admin, fx_test_article) -> None:
-    print("\n--> test_articles__search")
-
     # Нужно дождаться пока индекс инициализируется.
     time.sleep(1)
 

@@ -4,7 +4,6 @@ PROFILES_URL = TestConfig.PROFILES_URL
 
 
 def test_profiles__crud(fx_app, fx_auth_admin) -> None:
-    print("\n--> test_profiles__crud")
     new_profile = {
         "name": "test_crud_name_profile",
         "lastname": "test_crud_lastname_profile",

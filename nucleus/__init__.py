@@ -13,7 +13,7 @@ from nucleus.common.contexts import register_context_handlers
 from nucleus.common.errors import register_errors
 from nucleus.common.extensions import db
 from nucleus.common.extensions import register_extensions
-from nucleus.common.load_data import load_init_data
+from nucleus.common.init_data import load_init_data
 from nucleus.common.logging import logging_configuration
 from nucleus.config import Config
 
@@ -64,6 +64,19 @@ def create_app(config_app: Type[Config]) -> connexion:
             app.logger.warning(f"Elasticsearch not available: {err}!")
             sys.exit()
 
+    # Create folder for files.
+    for _ in range(3):
+        try:
+            os.makedirs(os.path.join(app.config["FILES_BASE_DIR"], "thumbnails"))
+            app.logger.info("Folder for files created!")
+            break
+        except FileExistsError:
+            app.logger.info("Folder for files exist!")
+            break
+        except Exception as err:
+            app.logger.warning(f"Folder for files not available: {err}!")
+            sys.exit()
+
     # Create tables in database.
     with app.app_context():
         for _ in range(10):
@@ -77,22 +90,16 @@ def create_app(config_app: Type[Config]) -> connexion:
             db.create_all()
             load_init_data()
             app.logger.info("Database created!")
+
+            # UWSGI создаёт форки процесса, что вызывает использование одного и того же пула
+            # соединений с БД всеми форками. "db.engine.dispose()" закрывает пул, в результате
+            # происходит пересоздание пула для каждого форка.
+            # Детали - https://docs.sqlalchemy.org/en/13/core/connections.html#engine-disposal
+            db.session.remove()
+            db.engine.dispose()
+
         except SQLAlchemyError as err:
             app.logger.warning(f"Database not created: {err}!")
-            sys.exit()
-
-    # Create folder for files.
-    for _ in range(3):
-        try:
-            os.mkdir(app.config["FILES_BASE_DIR"])
-            os.mkdir(os.path.join(app.config["FILES_BASE_DIR"], "thumbnails"))
-            app.logger.info("Folder for files created!")
-            break
-        except FileExistsError:
-            app.logger.info("Folder for files exist!")
-            break
-        except Exception as err:
-            app.logger.warning(f"Folder for files not available: {err}!")
             sys.exit()
 
     return app_conn

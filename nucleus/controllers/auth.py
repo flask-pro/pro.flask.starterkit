@@ -5,6 +5,7 @@ from flask import current_app
 from jose import jwt
 from werkzeug.security import check_password_hash
 
+from nucleus.controllers.logs import log_controller
 from nucleus.controllers.users import user_controller
 from nucleus.models.users import Users
 
@@ -42,13 +43,17 @@ class Auth:
     @classmethod
     def login(cls, username: str, password: str) -> [int, dict]:
         user = Users.query.filter_by(username=username).first()
-        if user is None:
-            abort(400, f"User NOT exist! | username: <{username}>")
+        if not user:
+            abort(400, "Authorization failed!")
+        elif user.is_blocked:
+            abort(401, "User is blocked!")
         elif check_password_hash(user.password_hash, password):
             return cls.get_token(user.id)
         else:
-            abort(400, f"Password wrong! | username: <{username}>")
+            abort(400, "Authorization failed!")
 
     @classmethod
     def signup(cls, user: dict) -> dict:
-        return user_controller.create(user).to_dict()
+        new_user = user_controller.create(user)
+        log_controller.create({"username": new_user.username, "event": "user_signup"})
+        return new_user.to_dict()

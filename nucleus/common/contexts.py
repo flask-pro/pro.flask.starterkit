@@ -4,7 +4,7 @@ from flask import Flask
 def register_context_handlers(app: Flask) -> Flask:
     @app.after_request
     def after_request(response):
-        # Set headers for enable CORS.
+        # Установка заголовков запроса для активации CORS.
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         response.headers.add(

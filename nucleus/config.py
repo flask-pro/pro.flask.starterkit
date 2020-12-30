@@ -8,7 +8,7 @@ class Config:
 
     BASE_DIR = basedir
 
-    ENV = os.getenv("FLASK_ENV") or "development"
+    ENV = os.getenv("FLASK_ENV")
     DEBUG = os.getenv("FLASK_DEBUG") or 0
     JSON_AS_ASCII = False
 
@@ -60,3 +60,6 @@ class Config:
     TELEGRAM_API_URL = os.getenv("TELEGRAM_API_URL")
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
     TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+    CDN_BASE_URL = os.getenv("CDN_BASE_URL")
+    CDN_SECRET = os.getenv("CDN_SECRET")

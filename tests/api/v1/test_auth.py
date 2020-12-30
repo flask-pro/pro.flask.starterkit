@@ -8,7 +8,6 @@ ACCOUNTS_URL = TestConfig.ACCOUNTS_URL
 
 
 def test_auth__crud(fx_app) -> None:
-    print("\n--> test_auth__crud")
     new_user = {"username": "test_auth_user", "password": "test_password"}
     headers = {
         "Authorization": "Basic {}".format(
@@ -49,7 +48,6 @@ def test_auth__crud(fx_app) -> None:
     ],
 )
 def test_auth__wrong_login_password(fx_app, payload: dict) -> None:
-    print("\n--> test_auth__wrong_login_password")
     headers = {
         "Authorization": "Basic {}".format(
             base64.b64encode(
@@ -69,12 +67,10 @@ def test_auth__wrong_login_password(fx_app, payload: dict) -> None:
     ],
 )
 def test_auth__error_400(fx_app, payload: dict) -> None:
-    print("\n--> test_auth__error_400")
     assert fx_app.post("/v1/signup", json=payload).status_code == 400
 
 
 def test_auth__double_signup(fx_app) -> None:
-    print("\n--> test_auth__double_signup")
     new_user = {"username": "test_double_user", "password": "test_password"}
 
     # Signup first.
@@ -87,12 +83,10 @@ def test_auth__double_signup(fx_app) -> None:
 
 
 def test_auth__non_auth(fx_app) -> None:
-    print("\n--> test_auth__non_auth")
     assert fx_app.get(f"{ACCOUNTS_URL}/profile").status_code == 401
 
 
 def test_auth__bad_token(fx_app) -> None:
-    print("\n--> test_auth__bad_token")
     assert (
         fx_app.get(
             f"{ACCOUNTS_URL}/profile", headers={"Authorization": "Bearer BAD_TOKEN"}
