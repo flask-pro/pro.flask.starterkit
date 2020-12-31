@@ -57,10 +57,10 @@ def fx_auth_admin(fx_app) -> dict:
 
     :return: authorization header
     """
-    user = {"username": "admin", "password": "secret", "role": "admin"}
+    user = {"email": "admin@nucleus.admin", "password": "secret", "role": "admin"}
     headers = {
         "Authorization": "Basic {}".format(
-            base64.b64encode(f'{user["username"]}:{user["password"]}'.encode()).decode()
+            base64.b64encode(f'{user["email"]}:{user["password"]}'.encode()).decode()
         )
     }
     r = fx_app.post("/v1/login", headers=headers)
@@ -234,12 +234,12 @@ def fx_test_feedback(fx_app, fx_auth_admin, fx_test_category) -> Generator[dict,
 
 @pytest.fixture
 def fx_test_user(fx_app, fx_auth_admin) -> Generator[dict, None, None]:
-    new_user_data = {"username": fake.profile()["username"], "password": fake.password()}
+    new_user_data = {"email": fake.email(), "password": fake.password()}
 
     headers = {
         "Authorization": "Basic {}".format(
             base64.b64encode(
-                f'{new_user_data["username"]}:{new_user_data["password"]}'.encode()
+                f'{new_user_data["email"]}:{new_user_data["password"]}'.encode()
             ).decode()
         )
     }

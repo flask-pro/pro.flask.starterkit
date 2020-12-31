@@ -25,23 +25,23 @@ class User(BaseController):
             {"name": "user", "lastname": "user", "user_id": new_user_from_db.id}
         )
 
-        log_controller.create({"username": new_user_from_db.username, "event": "user_created"})
+        log_controller.create({"email": new_user_from_db.email, "event": "user_created"})
 
         return self.model_manager.get(new_user_from_db.id)
 
     def delete(self, id_: str) -> UsersModel:
         deleted_user = self.model_manager.delete(id_)
-        log_controller.create({"username": deleted_user.username, "event": "user_deleted"})
+        log_controller.create({"email": deleted_user.email, "event": "user_deleted"})
         return deleted_user
 
     def block(self, id_: str) -> UsersModel:
         blocked_user = self.model_manager.patch({"id": id_, "is_blocked": True})
-        log_controller.create({"username": blocked_user.username, "event": "user_blocked"})
+        log_controller.create({"email": blocked_user.email, "event": "user_blocked"})
         return blocked_user
 
     def unblock(self, id_: str) -> UsersModel:
         unblocked_user = self.model_manager.patch({"id": id_, "is_blocked": False})
-        log_controller.create({"username": unblocked_user.username, "event": "user_unblocked"})
+        log_controller.create({"email": unblocked_user.email, "event": "user_unblocked"})
         return unblocked_user
 
 

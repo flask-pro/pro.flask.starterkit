@@ -41,8 +41,8 @@ class Auth:
         return token_dict
 
     @classmethod
-    def login(cls, username: str, password: str) -> [int, dict]:
-        user = Users.query.filter_by(username=username).first()
+    def login(cls, email: str, password: str) -> [int, dict]:
+        user = Users.query.filter_by(email=email).first()
         if not user:
             abort(400, "Authorization failed!")
         elif user.is_blocked:
@@ -55,5 +55,5 @@ class Auth:
     @classmethod
     def signup(cls, user: dict) -> dict:
         new_user = user_controller.create(user)
-        log_controller.create({"username": new_user.username, "event": "user_signup"})
+        log_controller.create({"email": new_user.email, "event": "user_signup"})
         return new_user.to_dict()

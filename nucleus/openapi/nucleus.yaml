@@ -859,10 +859,11 @@ paths:
         - $ref: "#/components/parameters/include_metadata"
         - $ref: "#/components/parameters/page"
         - $ref: "#/components/parameters/per_page"
-        - $ref: "#/components/parameters/username"
+        - $ref: "#/components/parameters/email"
         - $ref: "#/components/parameters/event"
         - $ref: "#/components/parameters/start_datetime_created"
         - $ref: "#/components/parameters/end_datetime_created"
+        - $ref: "#/components/parameters/sort_datetime_created"
       security:
         - jwt: []
       responses:
@@ -950,12 +951,13 @@ components:
       schema:
         type: string
         enum: [articles, feedbacks]
-    username:
-      name: username
+    email:
+      name: email
       in: query
       description: Имя пользователя.
       schema:
         type: string
+        format: email
         example: example_user
     event:
       name: event
@@ -980,11 +982,23 @@ components:
         type: string
         format: date-time
         example: 2020-12-13T06:13:00.199194Z
+    sort_datetime_created:
+      name: sort_datetime_created
+      in: query
+      description: Порядок сортировки записей лога по дате создания.
+      schema:
+        type: string
+        enum: [asc, desc]
   schemas:
     ID:
       type: string
       example: 789d995f-3aa0-4bf8-a77b-2f2f20868503
       description: UUID
+    MOBILE_PHONE:
+      type: string
+      minLength: 11
+      maxLength: 11
+      example: "71234567890"
     DATETIME:
       type: string
       format: date-time
@@ -1015,46 +1029,53 @@ components:
     Signup:
       type: object
       required:
-        - username
+        - email
         - password
       additionalProperties: false
       properties:
-        username:
+        email:
           type: string
-          example: "user"
+          format: email
+          example: "example_email@example_domain.com"
         password:
           type: string
           example: "secret"
+        mobile_phone:
+          $ref: "#/components/schemas/MOBILE_PHONE"
     UserNew:
       type: object
       required:
-        - username
+        - email
         - password
         - role
       additionalProperties: false
       properties:
-        username:
+        email:
           type: string
-          example: "user"
+          format: email
+          example: "example_email@example_domain.com"
         password:
           type: string
           example: "secret"
         role:
           type: string
           example: "user"
+        mobile_phone:
+          $ref: "#/components/schemas/MOBILE_PHONE"
     User:
       type: object
       required:
         - id
-        - username
+        - email
         - role
       additionalProperties: false
       properties:
         id:
           $ref: "#/components/schemas/ID"
-        username:
+        email:
           type: string
-          example: "user"
+          format: email
+          example: "example_email@example_domain.com"
         role:
           type: string
           example: "user"
@@ -1063,6 +1084,8 @@ components:
         is_blocked:
           type: boolean
           example: False
+        mobile_phone:
+          $ref: "#/components/schemas/MOBILE_PHONE"
     UsersList:
       type: object
       required:
@@ -1511,7 +1534,7 @@ components:
       type: object
       required:
         - id
-        - username
+        - email
         - event
         - message
         - datetime_created
@@ -1519,9 +1542,10 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/ID"
-        username:
+        email:
           type: string
-          example: example_username
+          format: email
+          example: "example_email@example_domain.com"
         event:
           type: string
           example: "user_created"

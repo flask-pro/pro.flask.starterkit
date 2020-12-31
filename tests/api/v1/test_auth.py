@@ -8,10 +8,14 @@ ACCOUNTS_URL = TestConfig.ACCOUNTS_URL
 
 
 def test_auth__crud(fx_app) -> None:
-    new_user = {"username": "test_auth_user", "password": "test_password"}
+    new_user = {
+        "email": "test_auth_user@test_server.ru",
+        "password": "test_password",
+        "mobile_phone": "71234567890",
+    }
     headers = {
         "Authorization": "Basic {}".format(
-            base64.b64encode(f'{new_user["username"]}:{new_user["password"]}'.encode()).decode()
+            base64.b64encode(f'{new_user["email"]}:{new_user["password"]}'.encode()).decode()
         )
     }
 
@@ -19,7 +23,8 @@ def test_auth__crud(fx_app) -> None:
     r_signup = fx_app.post("/v1/signup", json=new_user)
     assert r_signup.status_code == 201
     assert "id" in r_signup.json
-    assert r_signup.json["username"] == new_user["username"]
+    assert r_signup.json["email"] == new_user["email"]
+    assert r_signup.json["mobile_phone"] == new_user["mobile_phone"]
     assert r_signup.json["role"] == "user"
     assert r_signup.json["profile_id"]
 
@@ -41,18 +46,16 @@ def test_auth__crud(fx_app) -> None:
 @pytest.mark.parametrize(
     "payload",
     [
-        ({"username": "BAD_USER"}),
+        ({"email": "BAD_EMAIL@BAD_DOMAIN.BAD"}),
         ({"password": "BAD_PASSWORD"}),
-        ({"username": "BAD_USER", "password": "BAD_PASSWORD"}),
-        ({"username": "admin", "password": "BAD_PASSWORD"}),
+        ({"email": "BAD_EMAIL@BAD_DOMAIN.BAD", "password": "BAD_PASSWORD"}),
+        ({"email": "admin", "password": "BAD_PASSWORD"}),
     ],
 )
 def test_auth__wrong_login_password(fx_app, payload: dict) -> None:
     headers = {
         "Authorization": "Basic {}".format(
-            base64.b64encode(
-                f'{payload.get("username")}:{payload.get("password")}'.encode()
-            ).decode()
+            base64.b64encode(f'{payload.get("email")}:{payload.get("password")}'.encode()).decode()
         )
     }
     assert fx_app.post("/v1/login", headers=headers).status_code == 400
@@ -61,9 +64,9 @@ def test_auth__wrong_login_password(fx_app, payload: dict) -> None:
 @pytest.mark.parametrize(
     "payload",
     [
-        ({"username": "BAD_USER"}),
+        ({"email": "BAD_EMAIL@BAD_DOMAIN.BAD"}),
         ({"password": "BAD_PASSWORD"}),
-        ({"username": "BAD_USER", "password": "BAD_PASSWORD", "BAD_KEY": "BAD_VALUE"}),
+        ({"email": "BAD_EMAIL@BAD_DOMAIN.BAD", "password": "BAD_PASSWORD", "BAD_KEY": "BAD_VALUE"}),
     ],
 )
 def test_auth__error_400(fx_app, payload: dict) -> None:
@@ -71,7 +74,7 @@ def test_auth__error_400(fx_app, payload: dict) -> None:
 
 
 def test_auth__double_signup(fx_app) -> None:
-    new_user = {"username": "test_double_user", "password": "test_password"}
+    new_user = {"email": "test_double_user@test_server.ru", "password": "test_password"}
 
     # Signup first.
     r_signup = fx_app.post("/v1/signup", json=new_user)

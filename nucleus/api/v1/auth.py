@@ -35,8 +35,8 @@ def decode_token(token) -> str:
         abort(401, "Token broken!")
 
 
-def basic_auth(username, password, required_scopes=None) -> dict:
-    return {"sub": Auth.login(username, password)}
+def basic_auth(email, password, required_scopes=None) -> dict:
+    return {"sub": Auth.login(email, password)}
 
 
 def apikey_auth(token, required_scopes=None) -> dict:

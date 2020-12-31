@@ -22,8 +22,8 @@ class Base(db.Model):
 
     __abstract__ = True
     __filterable__ = ["id"]
-    __interval_filterable__ = ["datetime_created"]
-    __sortable__ = ["datetime_created"]
+    __interval_filterable__ = []
+    __sortable__ = []
     __files__ = []
 
     id = db.Column(db.String, primary_key=True, index=True, default=make_uuid4, comment="ID")

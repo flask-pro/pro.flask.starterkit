@@ -9,7 +9,7 @@ def test_logs(fx_app, fx_auth_admin) -> None:
     assert logs.status_code == 200
     assert logs.json["items"]
     assert logs.json["items"][0]["id"]
-    assert logs.json["items"][0]["username"]
+    assert logs.json["items"][0]["email"]
     assert logs.json["items"][0]["event"]
     assert logs.json["items"][0]["message"]
     assert logs.json["items"][0]["datetime_created"]
@@ -17,14 +17,14 @@ def test_logs(fx_app, fx_auth_admin) -> None:
 
 def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
     # Signup.
-    new_user = {"username": "user_test_logs", "password": "test_password"}
+    new_user = {"email": "user_test_logs@nucleus.test", "password": "test_password"}
     user_signup = fx_app.post("/v1/signup", json=new_user)
     assert user_signup.status_code == 201
 
     result_filter_by_event_registration = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs", "event": "user_signup"},
+        query_string={"email": new_user["email"], "event": "user_signup"},
     )
     assert result_filter_by_event_registration.status_code == 200
     assert len(result_filter_by_event_registration.json["items"]) == 1
@@ -33,7 +33,7 @@ def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
     result_filter_by_event_create = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs", "event": "user_created"},
+        query_string={"email": new_user["email"], "event": "user_created"},
     )
     assert result_filter_by_event_create.status_code == 200
     assert len(result_filter_by_event_create.json["items"]) == 1
@@ -47,7 +47,7 @@ def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
     result_filter_by_event_block = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs", "event": "user_blocked"},
+        query_string={"email": new_user["email"], "event": "user_blocked"},
     )
     assert result_filter_by_event_block.status_code == 200
     assert len(result_filter_by_event_block.json["items"]) == 1
@@ -63,7 +63,7 @@ def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
     result_filter_by_event_unblock = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs", "event": "user_unblocked"},
+        query_string={"email": new_user["email"], "event": "user_unblocked"},
     )
     assert result_filter_by_event_unblock.status_code == 200
     assert len(result_filter_by_event_unblock.json["items"]) == 1
@@ -77,7 +77,7 @@ def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
     result_filter_by_event_delete = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs", "event": "user_deleted"},
+        query_string={"email": new_user["email"], "event": "user_deleted"},
     )
     assert result_filter_by_event_delete.status_code == 200
     assert len(result_filter_by_event_delete.json["items"]) == 1
@@ -86,7 +86,7 @@ def test_logs__filter_event(fx_app, fx_auth_admin) -> None:
 
 def test_logs__interval_filter(fx_app, fx_auth_admin) -> None:
     # Signup.
-    new_user = {"username": "user_test_logs_interval_filter", "password": "test_password"}
+    new_user = {"email": "user_test_logs_interval_filter@nucleus.test", "password": "test_password"}
     user_signup = fx_app.post("/v1/signup", json=new_user)
     assert user_signup.status_code == 201
 
@@ -98,7 +98,7 @@ def test_logs__interval_filter(fx_app, fx_auth_admin) -> None:
     start_datetime_created = fx_app.get(
         LOGS_URL,
         headers=fx_auth_admin,
-        query_string={"username": "user_test_logs_interval_filter", "event": "user_created"},
+        query_string={"email": new_user["email"], "event": "user_created"},
     ).json["items"][0]["datetime_created"]
 
     result_filter_by_event_delete = fx_app.get(
@@ -111,3 +111,17 @@ def test_logs__interval_filter(fx_app, fx_auth_admin) -> None:
     )
     assert result_filter_by_event_delete.status_code == 200
     assert len(result_filter_by_event_delete.json["items"]) == 3
+
+
+def test_logs__sorted(fx_app, fx_auth_admin, fx_test_user) -> None:
+    result_sorted_asc = fx_app.get(
+        LOGS_URL, headers=fx_auth_admin, query_string={"sort_datetime_created": "asc"}
+    )
+    assert result_sorted_asc.status_code == 200
+
+    result_sorted_desc = fx_app.get(
+        LOGS_URL, headers=fx_auth_admin, query_string={"sort_datetime_created": "desc"}
+    )
+    assert result_sorted_desc.status_code == 200
+
+    assert result_sorted_asc.json["items"][0] != result_sorted_desc.json["items"][0]

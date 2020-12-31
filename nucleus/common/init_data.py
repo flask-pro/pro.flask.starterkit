@@ -14,7 +14,7 @@ roles = [
     {"name": "user", "description": "Regular user"},
 ]
 
-users = [{"username": "admin", "password": "secret", "role": "admin"}]
+users = [{"email": "admin@nucleus.admin", "password": "secret", "role": "admin"}]
 
 
 def _load_roles(roles: list) -> None:

@@ -37,6 +37,24 @@ class Items:
                 value = parameters[end_field]
                 self._query = self._query.filter(getattr(self._model, field) < value)
 
+    def _sorting(self, parameters: dict) -> None:
+        """Добавление условий сортировки в запрос."""
+
+        sorting_parameters = {
+            key.replace("sort_", ""): value
+            for key, value in parameters.items()
+            if key.startswith("sort_") and key.replace("sort_", "") in self._model.__sortable__
+        }
+
+        if not sorting_parameters:
+            self._query = self._query.order_by(getattr(self._model, "datetime_created"))
+        else:
+            for key, value in sorting_parameters.items():
+                if value == "asc":
+                    self._query = self._query.order_by(getattr(self._model, key))
+                elif value == "desc":
+                    self._query = self._query.order_by(getattr(self._model, key).desc())
+
     def _pagination(self, parameters: dict) -> Pagination:
         """Create pagination object."""
 
@@ -60,6 +78,7 @@ class Items:
 
         self._filtration(parameters)
         self._interval_filtration(parameters)
+        self._sorting(parameters)
 
         result = self._pagination(parameters).items
 

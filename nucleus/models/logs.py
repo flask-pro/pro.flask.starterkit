@@ -5,9 +5,11 @@ from nucleus.models.base import Base
 
 
 class Logs(Base):
-    __filterable__ = ["username", "event"]
+    __filterable__ = ["email", "event"]
+    __interval_filterable__ = ["datetime_created"]
+    __sortable__ = ["datetime_created"]
 
-    username = db.Column(db.String, comment="Username")
+    email = db.Column(db.String, comment="email")
     _event = db.Column(db.String, nullable=False, comment="Event")
 
     events_messages = {
@@ -32,7 +34,7 @@ class Logs(Base):
     def to_dict(self) -> dict:
         article = {
             "id": self.id,
-            "username": self.username,
+            "email": self.email,
             "event": self.event,
             "message": self.events_messages[self._event],
             "description": self.description,

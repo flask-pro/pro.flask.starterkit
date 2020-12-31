@@ -7,25 +7,29 @@ ROLES_URL = TestConfig.ROLES_URL
 
 
 def test_users__crud(fx_app, fx_auth_admin) -> None:
-    new_user = {"username": "test_crud_user", "password": "test_password", "role": "user"}
+    new_user = {"email": "test_crud_user@nucleus.test", "password": "test_password", "role": "user"}
 
     r_create = fx_app.post(USERS_URL, headers=fx_auth_admin, json=new_user)
     assert r_create.status_code == 201
     assert "id" in r_create.json
-    assert r_create.json["username"] == new_user["username"]
+    assert r_create.json["email"] == new_user["email"]
 
     r_get = fx_app.get(f'{USERS_URL}/{r_create.json["id"]}', headers=fx_auth_admin)
     assert r_get.status_code == 200
     assert r_get.json["id"] == r_create.json["id"]
-    assert r_get.json["username"] == r_create.json["username"]
+    assert r_get.json["email"] == r_create.json["email"]
 
-    updated_user = {"id": r_create.json["id"], "username": "updated_test_user", "role": "user"}
+    updated_user = {
+        "id": r_create.json["id"],
+        "email": "updated_test_user@nucleus.test",
+        "role": "user",
+    }
     r_update = fx_app.put(
         f'{USERS_URL}/{r_create.json["id"]}', headers=fx_auth_admin, json=updated_user
     )
     assert r_update.status_code == 200
     assert r_update.json["id"] == r_create.json["id"]
-    assert r_update.json["username"] == updated_user["username"]
+    assert r_update.json["email"] == updated_user["email"]
 
     r_delete = fx_app.delete(f'{USERS_URL}/{r_create.json["id"]}', headers=fx_auth_admin)
     assert r_delete.status_code == 204
@@ -38,7 +42,7 @@ def test_users__bad_id(fx_app, fx_auth_admin) -> None:
     r_get = fx_app.get(f"{USERS_URL}/{bad_uuid}", headers=fx_auth_admin)
     assert r_get.status_code == 404
 
-    updated_user = {"id": bad_uuid, "username": "updated_test_user", "role": "user"}
+    updated_user = {"id": bad_uuid, "email": "updated_test_user@nucleus.test", "role": "user"}
     r_update = fx_app.put(f"{USERS_URL}/{bad_uuid}", headers=fx_auth_admin, json=updated_user)
     assert r_update.status_code == 404
 

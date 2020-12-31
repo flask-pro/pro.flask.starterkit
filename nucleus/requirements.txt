@@ -8,4 +8,4 @@ python-dotenv==0.15.0
 python-jose==3.2.0
 swagger-ui-bundle==0.0.8
 Pillow==8.0.1
-Faker==5.0.2
+Faker==5.1.0
