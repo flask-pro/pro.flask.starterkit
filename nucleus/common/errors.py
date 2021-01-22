@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
 
 from nucleus.common.extensions import db
-from nucleus.common.telegram import send_to_telegram
+from nucleus.common.external.telegram import send_to_telegram
 from nucleus.config import Config
 
 

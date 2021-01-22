@@ -1,5 +1,5 @@
 from nucleus.common.errors import NoResultSearch
-from nucleus.common.search import FulltextSearch
+from nucleus.common.external.elastic import FulltextSearch
 from nucleus.config import Config
 from nucleus.models.articles import Articles as ArticlesModel
 

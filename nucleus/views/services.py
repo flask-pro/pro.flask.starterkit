@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask import render_template
 
 from nucleus.common.extensions import db
-from nucleus.common.search import elasticsearch
+from nucleus.common.external.elastic import elasticsearch
 
 services = Blueprint("services", __name__)
 

@@ -2,7 +2,7 @@ import os
 from contextlib import suppress
 
 from nucleus.common.extensions import db
-from nucleus.common.search import FulltextSearch
+from nucleus.common.external.elastic import FulltextSearch
 from nucleus.config import Config
 from nucleus.controllers.utils import Items
 from nucleus.controllers.utils import ModelManager
